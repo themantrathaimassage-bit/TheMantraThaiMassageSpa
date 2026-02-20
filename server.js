@@ -164,8 +164,8 @@ app.all(/\/api\/square\/(.*)/, async (req, res) => {
     }
 });
 
-// SPA Routing
-app.get('(.*)', (req, res) => {
+// SPA Routing (Regex for Express 5 compatibility)
+app.get(/^(?!\/api).+/, (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
