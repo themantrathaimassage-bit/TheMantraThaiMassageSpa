@@ -230,7 +230,7 @@ app.get('/api/sync-reviews', (req, res) => {
 });
 
 // SPA Fallback
-app.get('*', (req, res) => {
+app.get('(.*)', (req, res) => {
     const indexFile = path.join(__dirname, 'dist', 'index.html');
     if (existsSync(indexFile)) return res.sendFile(indexFile);
     res.status(404).send('Not built yet');
