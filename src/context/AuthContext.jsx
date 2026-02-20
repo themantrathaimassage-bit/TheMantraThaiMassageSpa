@@ -17,28 +17,23 @@ export const AuthProvider = ({ children }) => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalConfig, setAuthModalConfig] = useState({ returnTo: '/' });
 
-    // Keep in sync with Firebase session (only if Firebase is configured)
+    // Sync user to localStorage whenever it changes
     useEffect(() => {
-        if (!auth) return;
-        const unsub = onAuthStateChanged(auth, (firebaseUser) => {
-            if (!firebaseUser) {
-                setUser(null);
-                localStorage.removeItem('sq_user');
-            }
-        });
-        return unsub;
-    }, []);
+        if (user) {
+            localStorage.setItem('sq_user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('sq_user');
+        }
+    }, [user]);
 
     const login = (userData) => {
         setUser(userData);
-        localStorage.setItem('sq_user', JSON.stringify(userData));
-        setIsAuthModalOpen(false); // Close modal on success
+        setIsAuthModalOpen(false);
     };
 
     const logout = async () => {
-        try { await auth.signOut(); } catch { }
+        try { if (auth) await auth.signOut(); } catch { }
         setUser(null);
-        localStorage.removeItem('sq_user');
     };
 
     const openAuth = (config = { returnTo: '/' }) => {
