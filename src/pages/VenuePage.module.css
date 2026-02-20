@@ -16,12 +16,25 @@
 }
 
 .mainContent {
-    padding-bottom: 80px;
+    padding-bottom: 40px;
     min-width: 0;
 }
 
 .sidebar {
     position: relative;
+}
+
+.sectionWrapper {
+    margin-bottom: 0;
+}
+
+.divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 24px 0;
+    /* Reduced from 32px for a tighter, more cohesive look */
+    border: none;
+    width: 100%;
 }
 
 @media (max-width: 1024px) {
@@ -31,5 +44,10 @@
 
     .sidebar {
         display: none;
+    }
+
+    .divider {
+        margin: 16px 0;
+        /* Tighter on mobile */
     }
 }

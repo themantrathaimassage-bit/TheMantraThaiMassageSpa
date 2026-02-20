@@ -1,7 +1,54 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Environment
 .env
+.env.*
+!.env.example
 .square-token.json
+*.json
+!package.json
+!tsconfig.json
+!jsconfig.json
+!manifest.json
+!firebase.json
+!*.schema.json
+!service-account-template.json
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+pubsub-debug.log*
+ui-debug.log*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 square-debug.log
+
+# Editor
+.vscode/
+.idea/
 .DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Project specific
 booking app/
+temp/
+tmp/
+scripts/cache/

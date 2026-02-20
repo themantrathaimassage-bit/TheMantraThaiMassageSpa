@@ -1,133 +1,95 @@
 .container {
-    background-color: white;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
-    padding: var(--spacing-lg);
-    margin-top: var(--spacing-lg);
+    background-color: transparent;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
+    color: var(--color-text);
     margin: 0;
+    letter-spacing: -0.3px;
 }
 
-.card {
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.mapSide {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.mainInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    max-width: 100%;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-}
-
-.descriptionWrapper {
-    margin-bottom: var(--spacing-sm);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
-.description {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #666;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-}
-
-.moreLink {
-    color: var(--color-primary);
-    font-weight: 600;
-    font-size: 13px;
-    flex-shrink: 0;
-}
-
-.readMoreBtn {
-    background: none;
-    border: none;
-    color: var(--color-primary);
-    font-weight: 600;
-    font-size: 13px;
-    padding: 0;
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.readMoreBtn:hover {
-    color: #000;
-}
-
-.mapContainer {
-    margin-bottom: var(--spacing-lg);
-}
-
 .mapFrame {
     width: 100%;
-    margin-bottom: var(--spacing-md);
-    border-radius: var(--radius-md);
+    border-radius: 16px;
     overflow: hidden;
+    line-height: 0;
+    border: 1px solid #f0f0f0;
+    height: 280px;
 }
 
-.address {
+.addressRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.addressInfo {
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 14px;
     color: var(--color-text);
+    font-weight: 500;
 }
 
 .pinIcon {
-    color: var(--color-text-light);
+    color: #666;
+    flex-shrink: 0;
+}
+
+.directionsLink {
+    font-size: 13px;
+    color: var(--color-text);
+    text-decoration: underline;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.hoursSide {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #f0f0f0;
+    padding: 20px;
 }
 
 .subtitle {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: var(--spacing-md);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--color-text);
 }
 
 .hoursList {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .hourItem {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.bold {
-    font-weight: 700;
-    color: black !important;
-}
-
-.hourItem:last-child {
-    border-bottom: none;
+    font-size: 13px;
+    line-height: 1;
 }
 
 .day {
@@ -136,4 +98,28 @@
 
 .time {
     color: var(--color-text-light);
+}
+
+.isToday {
+    font-weight: 700;
+}
+
+.isToday .day,
+.isToday .time {
+    color: #000;
+}
+
+@media (max-width: 991px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .hoursSide {
+        padding: 16px;
+    }
+
+    .mapFrame {
+        height: 240px;
+    }
 }

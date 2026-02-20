@@ -17,6 +17,11 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
+      // Proxy Google Reviews API
+      '/api/reviews': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      }
     }
   }
 })
