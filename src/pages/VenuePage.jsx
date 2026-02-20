@@ -18,19 +18,29 @@ const VenuePage = () => {
     const [venue, setVenue] = useState(venueData);
     const [services, setServices] = useState(servicesData);
     const [servicesLoading, setServicesLoading] = useState(true);
+    const [reviews, setReviews] = useState(reviewsData);
     const { searchQuery } = useSearch();
     const { addService } = useCart();
     const navigate = useNavigate();
 
-    // Fetch live catalog from Square on mount
+    // Fetch live catalog and reviews on mount
     React.useEffect(() => {
         setServicesLoading(true);
+        // Fetch Services
         fetchSquareServices().then(live => {
             if (live && live.length > 0) setServices(live);
             setServicesLoading(false);
         }).catch(() => {
             setServicesLoading(false);
         });
+
+        // Fetch Reviews
+        fetch('/api/reviews')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) setReviews(data);
+            })
+            .catch(err => console.error('Failed to fetch reviews:', err));
     }, []);
 
     const handleServiceSelect = (service) => {
@@ -112,7 +122,7 @@ const VenuePage = () => {
 
                     <div id="reviews" style={{ scrollMarginTop: '140px' }}>
                         <ReviewsSection
-                            reviews={reviewsData}
+                            reviews={reviews}
                             rating={venue.rating}
                             reviewCount={venue.reviewCount}
                         />

@@ -229,6 +229,21 @@ app.all(/\/api\/square\/(.*)/, async (req, res) => {
     }
 });
 
+// Google Reviews API
+app.get('/api/reviews', async (req, res) => {
+    try {
+        if (db) {
+            const snapshot = await db.ref('square/reviews').once('value');
+            if (snapshot.exists()) return res.json(snapshot.val());
+        }
+        // Fallback to local data
+        const { reviewsData } = await import('./src/data/reviewsData.js');
+        res.json(reviewsData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Review Sync Trigger Endpoint
 app.post('/api/sync-reviews', (req, res) => {
     syncReviews();
