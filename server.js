@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
 import fetch from 'node-fetch';
+import admin from 'firebase-admin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -30,21 +31,44 @@ if (existsSync(distPath)) {
     console.log('⚠️ Warning: "dist" folder not found. Run "npm run build" first.');
 }
 
-// ─── Token Storage ────────────────────────────────────────────────────────────
-const TOKEN_FILE = path.join(__dirname, '.square-token.json');
-
-function loadToken() {
-    if (existsSync(TOKEN_FILE)) {
-        try { return JSON.parse(readFileSync(TOKEN_FILE, 'utf-8')); } catch { }
+// ─── Firebase Admin Setup ────────────────────────────────────────────────────
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}-default-rtdb.asia-southeast1.firebasedatabase.app`
+        });
+        console.log('✅ Firebase Admin initialized');
+    } catch (err) {
+        console.error('❌ Firebase Admin init failed:', err.message);
     }
-    return null;
 }
 
-function saveToken(data) {
-    writeFileSync(TOKEN_FILE, JSON.stringify(data, null, 2));
+const db = admin.apps.length ? admin.database() : null;
+const TOKEN_PATH = 'square/token';
+
+async function loadToken() {
+    if (!db) return null;
+    try {
+        const snapshot = await db.ref(TOKEN_PATH).once('value');
+        return snapshot.val();
+    } catch (err) {
+        console.error('Error loading token from Firebase:', err.message);
+        return null;
+    }
 }
 
-let tokenData = loadToken();
+async function saveToken(data) {
+    if (!db) return;
+    try {
+        await db.ref(TOKEN_PATH).set(data);
+    } catch (err) {
+        console.error('Error saving token to Firebase:', err.message);
+    }
+}
+
+let tokenData = await loadToken();
 
 // ─── Square Config ────────────────────────────────────────────────────────────
 const SQUARE_APP_ID = process.env.SQUARE_APP_ID;
@@ -92,8 +116,22 @@ app.get('/api/square-oauth/url', (req, res) => {
     if (!SQUARE_APP_ID) return res.status(500).json({ error: 'SQUARE_APP_ID not set' });
     const scope = 'APPOINTMENTS_WRITE APPOINTMENTS_READ APPOINTMENTS_ALL_READ ITEMS_READ CUSTOMERS_READ CUSTOMERS_WRITE';
     const state = Math.random().toString(36).slice(2);
-    const url = `${SQUARE_BASE_URL}/oauth2/authorize?client_id=${SQUARE_APP_ID}&scope=${encodeURIComponent(scope)}&state=${state}&session=false&response_type=code`;
-    res.json({ url });
+    // Explicitly include REDIRECT_URI to ensure Square has the correct callback address
+    const url = `${SQUARE_BASE_URL}/oauth2/authorize?client_id=${SQUARE_APP_ID}&scope=${encodeURIComponent(scope)}&state=${state}&session=false&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+
+    // Return a friendly HTML page with a button instead of raw JSON
+    res.send(`
+        <html>
+            <body style="font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f8f9fa;">
+                <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 450px;">
+                    <h2 style="margin-bottom: 20px; color: #333;">Authorize Square</h2>
+                    <p style="color: #666; margin-bottom: 30px; line-height: 1.5;">Connect your Square account to enable live bookings and service synchronization on this server.</p>
+                    <a href="${url}" style="background: #007bff; color: white; text-decoration: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">Connect Now</a>
+                    <p style="margin-top: 25px; font-size: 13px; color: #999;">Note: This links your shop to this specific deployment.</p>
+                </div>
+            </body>
+        </html>
+    `);
 });
 
 app.get('/api/square-oauth/callback', async (req, res) => {
