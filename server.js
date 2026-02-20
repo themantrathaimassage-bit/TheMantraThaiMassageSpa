@@ -244,10 +244,10 @@ app.get('/api/reviews', async (req, res) => {
     }
 });
 
-// Review Sync Trigger Endpoint
-app.post('/api/sync-reviews', (req, res) => {
+// Review Sync Trigger Endpoint (Changed to GET for easier browser access)
+app.get('/api/sync-reviews', (req, res) => {
     syncReviews();
-    res.json({ message: 'Sync triggered' });
+    res.json({ message: 'Review sync triggered in background' });
 });
 
 // SPA Routing (Regex for Express 5 compatibility)
