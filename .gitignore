@@ -4,3 +4,4 @@ dist
 .square-token.json
 square-debug.log
 .DS_Store
+booking app/
