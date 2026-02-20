@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
+import fetch from 'node-fetch';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -21,8 +22,13 @@ app.use(express.json());
 // ─── Health check ────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.send('system active'));
 
-// Serve static files from the React app build folder
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files (with safety check)
+const distPath = path.join(__dirname, 'dist');
+if (existsSync(distPath)) {
+    app.use(express.static(distPath));
+} else {
+    console.log('⚠️ Warning: "dist" folder not found. Run "npm run build" first.');
+}
 
 // ─── Token Storage ────────────────────────────────────────────────────────────
 const TOKEN_FILE = path.join(__dirname, '.square-token.json');
