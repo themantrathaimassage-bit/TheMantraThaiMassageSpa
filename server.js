@@ -78,22 +78,45 @@ async function saveToken(data) {
 let tokenData = null;
 loadToken().then(data => { tokenData = data; });
 
-// ─── Auto Google Reviews Sync ──────────────────────────────────────────────────
-import { exec } from 'child_process';
-function syncReviews() {
-    console.log('🔄 Running scheduled reviews sync...');
-    exec('node scripts/updateReviews.js', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`❌ Review sync error: ${error.message}`);
-            return;
+// ─── Auto Google Reviews Sync (Places API Version) ──────────────────────────
+const GOOGLE_API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+const PLACE_ID = 'ChIJUVidmLOpEmsRXiXxb3tifbk'; // The Mantra Marrickville Place ID
+
+async function syncReviews() {
+    if (!GOOGLE_API_KEY) {
+        console.error('⚠️ Skipping review sync: GOOGLE_MAPS_API_KEY missing');
+        return;
+    }
+    console.log('🔄 Fetching latest Google reviews via API...');
+
+    try {
+        const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&key=${GOOGLE_API_KEY}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (data.status !== 'OK') throw new Error(data.error_message || data.status);
+
+        const reviews = (data.result.reviews || []).map((r, index) => ({
+            id: `google-${index}`,
+            user: r.author_name,
+            rating: r.rating,
+            date: r.relative_time_description,
+            comment: r.text
+        })).filter(r => r.comment.length > 5).slice(0, 10);
+
+        if (reviews.length > 0) {
+            if (db) {
+                await db.ref('square/reviews').set(reviews);
+                console.log(`✅ Success! Updated ${reviews.length} reviews from Google Places API.`);
+            }
         }
-        if (stderr) console.error(`⚠️ Review sync stderr: ${stderr}`);
-        console.log(`✅ Review sync success: ${stdout}`);
-    });
+    } catch (err) {
+        console.error(`❌ Review sync failed: ${err.message}`);
+    }
 }
 
-// Run sync every hour
-setInterval(syncReviews, 60 * 60 * 1000);
+// Run sync every 4 minutes (~10,800 calls/month to stay within Google's $200 free tier)
+setInterval(syncReviews, 4 * 60 * 1000);
 // Run once on startup after 10 seconds
 setTimeout(syncReviews, 10000);
 
