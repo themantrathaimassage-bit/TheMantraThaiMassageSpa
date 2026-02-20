@@ -1,0 +1,752 @@
+/* ── Guest tabs (multi-guest time selection) ── */
+.guestTabs {
+    position: sticky;
+    top: 56px;
+    z-index: 70;
+    background-color: white;
+    margin: -12px -16px 8px;
+    padding: 8px 16px 8px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .guestTabs {
+        top: 48px;
+        /* Mobile header height */
+    }
+}
+
+.guestTabs::-webkit-scrollbar {
+    display: none;
+}
+
+.guestTab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 6px 10px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 90px;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .guestTab:hover {
+        border-color: var(--color-primary);
+    }
+}
+
+.guestTabActive {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 6%, white);
+}
+
+.guestTabDone {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.guestTabLocked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.guestTabName {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.guestTabTime {
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+}
+
+.guestTabPending {
+    font-size: 11px;
+    color: var(--color-text-light);
+}
+
+.selectingFor {
+    font-size: 12px;
+    color: var(--color-text-light);
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: color-mix(in srgb, var(--color-primary) 6%, white);
+    border-radius: 6px;
+    border-left: 2px solid var(--color-primary);
+}
+
+.selectingFor strong {
+    color: var(--color-text);
+}
+
+.selectingForStaff {
+    color: var(--color-text-light);
+}
+
+/* ── Container ── */
+.container {
+    padding: 12px 0 40px;
+    position: relative;
+    overscroll-behavior: contain;
+    /* Prevents bouncing */
+}
+
+.singleGuest {
+    padding-top: 0;
+}
+
+
+@media (max-width: 1024px) {
+    .container {
+        padding-bottom: 16px;
+    }
+}
+
+/* ── Header row ── */
+.header {
+    position: sticky;
+    top: 106px;
+    /* Adjusted tops */
+    z-index: 65;
+    background: white;
+    margin: 0 -16px;
+    padding: 2px 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.singleGuest .header {
+    top: 56px;
+    margin-top: -12px;
+    padding-top: 12px;
+}
+
+@media (max-width: 768px) {
+    .header {
+        top: 96px;
+        /* 48 + ~48 */
+    }
+
+    .singleGuest .header {
+        top: 48px;
+        margin-top: -12px;
+        padding-top: 12px;
+    }
+}
+
+.title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.calendarToggle {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .calendarToggle:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+}
+
+/* ── Full calendar ── */
+.fullCalendar {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 12px;
+    margin: 0 0 12px;
+}
+
+.calendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.calendarHeader button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: var(--color-text);
+    transition: background 0.15s;
+}
+
+@media (hover: hover) {
+    .calendarHeader button:hover {
+        background: var(--color-surface);
+    }
+}
+
+.currentMonth {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-light);
+    padding: 4px 0;
+}
+
+.dayBtn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .dayBtn:hover:not(:disabled) {
+        background: var(--color-surface);
+    }
+}
+
+.selectedDay {
+    background: var(--color-text) !important;
+    color: white;
+}
+
+.disabledDay {
+    color: var(--color-border);
+    cursor: not-allowed;
+    opacity: 0.35;
+}
+
+.emptyDay {
+    aspect-ratio: 1;
+}
+
+/* ── Horizontal date strip ── */
+.dateScroller {
+    position: sticky;
+    top: 134px;
+    z-index: 50;
+    background: white;
+    margin: 0 -16px 0;
+    padding: 0 16px 4px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.singleGuest .dateScroller {
+    top: 90px;
+    /* Tighter for single guest (56 + ~34) */
+}
+
+@media (max-width: 768px) {
+    .dateScroller {
+        top: 126px;
+        /* 96 + ~30 */
+    }
+
+    .singleGuest .dateScroller {
+        top: 78px;
+        /* 48 + ~30 */
+    }
+}
+
+.dateScroller::-webkit-scrollbar {
+    display: none;
+}
+
+.dateItem {
+    min-width: 40px;
+    height: 48px;
+    border-radius: 8px;
+    border: 1.2px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .dateItem:hover {
+        border-color: var(--color-primary);
+    }
+}
+
+.selectedDate {
+    background: var(--color-text);
+    color: white;
+    border-color: var(--color-text);
+}
+
+.dayName {
+    font-size: 9px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 1px;
+}
+
+.dayNum {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.month {
+    font-size: 9px;
+    margin-top: 1px;
+    opacity: 0.7;
+}
+
+/* ── Selected date label ── */
+.selectedDateLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-light);
+    margin: 4px 0 6px;
+    padding: 0 2px;
+}
+
+/* ── Loading ── */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+    color: var(--color-text-light);
+    gap: 10px;
+    font-size: 13px;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid var(--color-surface);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+/* ── No slots ── */
+.noSlots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 0;
+    color: var(--color-text-light);
+    gap: 10px;
+}
+
+.noSlotsIcon {
+    font-size: 32px;
+}
+
+.noSlots p {
+    font-size: 13px;
+    margin: 0;
+}
+
+.nextAvailableBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 4px;
+}
+
+.nextAvailableBtn:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.nextAvailableBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btnSpinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+/* ── Slots container ── */
+.slotsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── Period block ── */
+
+.periodHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.periodIcon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.periodLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.periodCount {
+    font-size: 11px;
+    color: var(--color-text-light);
+    margin-left: auto;
+}
+
+/* ── Pill grid ── */
+.pillGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+}
+
+.pill {
+    padding: 8px 4px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .pill:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: #f5f3ff;
+    }
+}
+
+.pillSelected {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(99, 91, 255, 0.3);
+}
+
+.pillConfirmed {
+    background: #22c55e;
+    border-color: #16a34a;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.pillBlocked {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+}
+
+.slotTime {
+    line-height: 1;
+}
+
+.blockedLabel {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+/* ── Confirm bar ── */
+.confirmBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid var(--color-border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    animation: slideUp 0.2s ease;
+}
+
+.confirmInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.confirmTime {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1;
+}
+
+.confirmDate {
+    font-size: 12px;
+    color: var(--color-text-light);
+}
+
+.confirmBtn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+    .confirmBtn:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+    }
+}
+
+/* ── Animations ── */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── Add-on only notice ── */
+.addonOnlyNotice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px 16px;
+    gap: 8px;
+    background: linear-gradient(135deg, #fdfcff 0%, #f5f3ff 100%);
+    border-radius: 12px;
+    border: 1px solid #ede9fe;
+}
+
+.addonOnlyNotice p {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.addonOnlySubtext {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: var(--color-text-light) !important;
+}
+
+/* ── Confirmation Modal ── */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.confirmModal {
+    background: white;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+@media (min-width: 640px) {
+    .confirmModal {
+        border-radius: 20px;
+        margin-bottom: 40px;
+    }
+}
+
+.confirmHeader {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.confirmIcon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.confirmHeader h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.confirmHeader p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.confirmDetails {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.detailRow:not(:last-child) {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detailLabel {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.detailValue {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.confirmActions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.cancelLink {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.confirmSlotBtn {
+    flex: 1;
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.confirmSlotBtn:active {
+    transform: scale(0.98);
+}

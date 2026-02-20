@@ -1,0 +1,6 @@
+node_modules
+dist
+.env
+.square-token.json
+square-debug.log
+.DS_Store

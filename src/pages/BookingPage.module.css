@@ -1,0 +1,84 @@
+.page {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+}
+
+.header {
+    height: 56px;
+    /* Slimmer booking header */
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-md);
+    background-color: white;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.closeBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.closeBtn:hover {
+    background-color: var(--color-surface);
+}
+
+.stepTitle {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .header {
+        height: 48px;
+        padding: 0 var(--spacing-sm);
+    }
+
+    .stepTitle {
+        font-size: 14px;
+    }
+
+    .closeBtn {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+.contentGrid {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: var(--spacing-lg) var(--spacing-md);
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+}
+
+.mainColumn {
+    min-width: 0;
+}
+
+
+
+@media (max-width: 1024px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
+    }
+}

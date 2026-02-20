@@ -1,0 +1,81 @@
+:root {
+  /* Colors */
+  --color-primary: #7A5CFA;
+  /* Purple */
+  --color-primary-hover: #5E3CC4;
+  --color-text: #000000;
+  --color-text-light: #757575;
+  --color-background: #FFFFFF;
+  --color-surface: #F2F2F7;
+  /* Light grey surface */
+  --color-border: #E0E0E0;
+  --color-success: #24A148;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Z-index */
+  --z-modal: 1000;
+  --z-sticky: 100;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  animation: appReveal 0.6s ease-out forwards;
+}
+
+@keyframes appReveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}

@@ -1,0 +1,139 @@
+.card {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    position: sticky;
+    top: 96px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.content {
+    padding: 24px;
+}
+
+.name {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--color-text);
+}
+
+.noReviews {
+    font-size: 14px;
+    color: var(--color-text-light);
+    margin-bottom: 24px;
+}
+
+.actions {
+    margin-bottom: 32px;
+}
+
+.bookBtn {
+    display: block;
+    background-color: var(--color-text);
+    /* Black */
+    color: white;
+    text-align: center;
+    padding: 14px;
+    border-radius: 9999px;
+    /* Pill shape */
+    font-weight: 600;
+    transition: background-color 0.2s;
+    font-size: 16px;
+}
+
+.bookBtn:hover {
+    background-color: #333;
+}
+
+.status {
+    margin-bottom: 16px;
+}
+
+.statusHeader {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.closed {
+    color: #C05850;
+}
+
+.open {
+    color: #0F8C3B;
+}
+
+.opensAtDetail {
+    color: inherit;
+    font-size: 0.95em;
+}
+
+.hoursList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.hourItem {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    align-items: center;
+    position: relative;
+    padding-left: 16px;
+}
+
+.currentDay::before {
+    content: "•";
+    color: #0F8C3B;
+    /* Green dot */
+    position: absolute;
+    left: 0;
+    font-size: 20px;
+    line-height: 1;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.day {
+    flex: 1;
+    color: black;
+}
+
+.time {
+    color: black;
+    text-align: right;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.location {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+}
+
+.addressText {
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+.directionsLink {
+    font-size: 14px;
+    color: var(--color-primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.directionsLink:hover {
+    text-decoration: underline;
+}

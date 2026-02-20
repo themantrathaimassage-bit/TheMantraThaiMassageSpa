@@ -1,0 +1,249 @@
+.hero {
+    background-color: var(--color-background);
+    padding-bottom: 12px;
+}
+
+.gallery {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    height: 300px;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto var(--spacing-lg);
+    padding: 0 var(--spacing-md);
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.gallery::-webkit-scrollbar {
+    display: none;
+}
+
+.galleryItem {
+    flex: 0 0 auto;
+    width: 400px;
+    height: 100%;
+    scroll-snap-align: start;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.galleryItem:hover {
+    transform: scale(0.98);
+}
+
+.showAllBtn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background-color: white;
+    color: var(--color-text);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    z-index: 2;
+}
+
+
+
+.showAllBtn:hover {
+    transform: scale(1.02);
+}
+
+.infoContainer {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.titleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.venueName {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-right: var(--spacing-md);
+}
+
+.actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.iconBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background-color 0.2s;
+}
+
+.iconBtn:hover {
+    background-color: var(--color-surface);
+}
+
+.ratingRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 14px;
+}
+
+.ratingBadge {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.stars {
+    display: flex;
+    color: var(--color-primary);
+}
+
+.starIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.reviewCount {
+    color: var(--color-text-light);
+    margin-left: 4px;
+}
+
+.dot {
+    color: var(--color-text-light);
+    margin: 0 4px;
+}
+
+.location {
+    color: var(--color-text-light);
+}
+
+.locationRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+.pinIcon {
+    color: var(--color-text-light);
+}
+
+.address {
+    color: var(--color-text-light);
+}
+
+.mapLink {
+    color: var(--color-primary);
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.metaContainer {
+    margin-bottom: 8px;
+    color: var(--color-text-light);
+}
+
+.metaInfo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.separator {
+    color: #E5E5E5;
+}
+
+.statusText {
+    font-weight: 500;
+}
+
+.verifiedBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text);
+}
+
+.verifiedIcon {
+    color: #F1AE3E;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .galleryItem {
+        width: 85vw;
+    }
+
+    .venueName {
+        font-size: 20px;
+    }
+
+    .metaInfo {
+        font-size: 11px;
+        gap: 8px;
+        /* Increase gap slightly */
+        row-gap: 4px;
+        /* Smaller vertical gap when wrapping */
+        line-height: 1.4;
+        align-items: center;
+        margin-left: 4px;
+        /* Shift right slightly */
+    }
+
+    .verifiedIcon {
+        font-size: 14px;
+    }
+
+    .verifiedBadge span {
+        font-size: 11px;
+    }
+
+    .address {
+        font-size: 11px;
+    }
+
+    .mapLink {
+        display: none;
+    }
+
+    .actions {
+        display: none;
+        /* Often hidden on mobile to save space, or keep if needed */
+    }
+
+    .metaContainer {
+        margin-bottom: 2px;
+    }
+
+    .locationRow {
+        margin-top: -4px;
+    }
+}

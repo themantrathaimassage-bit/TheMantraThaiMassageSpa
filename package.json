@@ -1,0 +1,44 @@
+{
+  "name": "god",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "node server.js",
+    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev\"",
+    "build": "vite build",
+    "start": "node server.js",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "update-reviews": "node scripts/updateReviews.js",
+    "sync-staff": "node scripts/syncStaff.js",
+    "sync-services": "node scripts/syncServices.js"
+  },
+  "dependencies": {
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "firebase": "^12.9.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.13.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "puppeteer": "^22.15.0",
+    "vite": "^7.3.1"
+  }
+}
