@@ -35,11 +35,17 @@ if (existsSync(distPath)) {
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        const projectId = serviceAccount.project_id;
+
+        // Use custom URL if provided, otherwise fallback to project-based URL
+        const dbUrl = process.env.FIREBASE_DATABASE_URL ||
+            `https://${projectId}-default-rtdb.asia-southeast1.firebasedatabase.app`;
+
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
-            databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}-default-rtdb.asia-southeast1.firebasedatabase.app`
+            databaseURL: dbUrl
         });
-        console.log('✅ Firebase Admin initialized');
+        console.log(`✅ Firebase Admin initialized for [${projectId}]`);
     } catch (err) {
         console.error('❌ Firebase Admin init failed:', err.message);
     }
@@ -68,7 +74,28 @@ async function saveToken(data) {
     }
 }
 
-let tokenData = await loadToken();
+// Load token at startup (non-blocking for server listen)
+let tokenData = null;
+loadToken().then(data => { tokenData = data; });
+
+// ─── Auto Google Reviews Sync ──────────────────────────────────────────────────
+import { exec } from 'child_process';
+function syncReviews() {
+    console.log('🔄 Running scheduled reviews sync...');
+    exec('node scripts/updateReviews.js', (error, stdout, stderr) => {
+        if (error) {
+            console.error(`❌ Review sync error: ${error.message}`);
+            return;
+        }
+        if (stderr) console.error(`⚠️ Review sync stderr: ${stderr}`);
+        console.log(`✅ Review sync success: ${stdout}`);
+    });
+}
+
+// Run sync every hour
+setInterval(syncReviews, 60 * 60 * 1000);
+// Run once on startup after 10 seconds
+setTimeout(syncReviews, 10000);
 
 // ─── Square Config ────────────────────────────────────────────────────────────
 const SQUARE_APP_ID = process.env.SQUARE_APP_ID;
@@ -200,6 +227,12 @@ app.all(/\/api\/square\/(.*)/, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// Review Sync Trigger Endpoint
+app.post('/api/sync-reviews', (req, res) => {
+    syncReviews();
+    res.json({ message: 'Sync triggered' });
 });
 
 // SPA Routing (Regex for Express 5 compatibility)
