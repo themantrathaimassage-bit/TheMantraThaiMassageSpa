@@ -10,7 +10,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 9999;
     padding: 20px;
     animation: fadeIn 0.3s ease;
 }
@@ -185,13 +185,15 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .overlay {
+        padding: 16px;
+    }
+
     .modal {
         max-width: 100%;
-        border-radius: 28px 28px 0 0;
-        position: absolute;
-        bottom: 0;
-        animation: mobileSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        border-radius: 24px;
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 }
 
