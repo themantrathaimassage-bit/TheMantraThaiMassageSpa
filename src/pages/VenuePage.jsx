@@ -35,6 +35,19 @@ const VenuePage = () => {
             if (!controller.signal.aborted) setServicesLoading(false);
         });
 
+        // Fetch Location Info
+        import('../data/squareCatalog').then(m => m.fetchSquareLocation()).then(liveLoc => {
+            if (!controller.signal.aborted && liveLoc) {
+                setVenue(prev => ({
+                    ...prev,
+                    ...liveLoc,
+                    // Preserve rating/reviewCount if already fetched from reviews
+                    rating: prev.rating,
+                    reviewCount: prev.reviewCount
+                }));
+            }
+        });
+
         // Fetch Reviews
         fetch('/api/reviews', { signal: controller.signal })
             .then(res => res.json())

@@ -7,7 +7,6 @@ import TimeSelection from '../components/TimeSelection';
 import CartSummary from '../components/CartSummary';
 import GuestSelector from '../components/GuestSelector';
 import { fetchSquareServices, createSquareBookings } from '../data/squareCatalog';
-import { staffData } from '../data/staffData';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './BookingPage.module.css';
@@ -20,20 +19,48 @@ const BookingPage = () => {
         try { return parseInt(sessionStorage.getItem('bk_step') || '1', 10); } catch { return 1; }
     });
     const [services, setServices] = useState([]);
+    const [staff, setStaff] = useState([{ id: 'any', name: 'Any professional', image: null }]);
     const [servicesLoading, setServicesLoading] = useState(true);
+    const [staffLoading, setStaffLoading] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
     const [bookingResult, setBookingResult] = useState(null); // null | 'success' | 'error'
     const [bookingErrors, setBookingErrors] = useState([]);
 
-    // Fetch live catalog from Square on mount
+    // 1. Fetch live catalog and staff on mount (Pre-fetch for speed)
     useEffect(() => {
+        // Fetch services
         fetchSquareServices().then(liveServices => {
             if (liveServices && liveServices.length > 0) {
                 setServices(liveServices);
             }
             setServicesLoading(false);
         });
+
+        // Fetch team members
+        import('../data/squareCatalog').then(m => m.fetchSquareTeamMembers()).then(team => {
+            if (team && team.length > 0) {
+                const formattedTeam = team.map(m => ({
+                    id: m.id,
+                    name: m.family_name ? `${m.given_name} ${m.family_name}` : m.given_name,
+                    image: null
+                }));
+                setStaff([{ id: 'any', name: 'Any professional', image: null }, ...formattedTeam]);
+            }
+        });
     }, []);
+
+    // 2. Add a deliberate "Visual Pulse" when switching to Step 2
+    // This makes the transition feel real and gives customers a sense of "fetching"
+    const [visualLoading, setVisualLoading] = useState(false);
+    useEffect(() => {
+        if (currentStep === 2) {
+            setVisualLoading(true);
+            const timer = setTimeout(() => {
+                setVisualLoading(false);
+            }, 600); // 600ms is the sweet spot for a "noticeable but fast" transition
+            return () => clearTimeout(timer);
+        }
+    }, [currentStep]);
 
     // Group Booking State — restored from sessionStorage if available
     const [guests, setGuests] = useState(() => {
@@ -183,14 +210,24 @@ const BookingPage = () => {
 
     const handleContinue = () => {
         if (currentStep === 1 && activeGuest.services.length > 0) {
-            const next = guests.find(g => g.services.length === 0);
-            if (next) setActiveGuestId(next.id);
-            else { setCurrentStep(2); setActiveGuestId(guests[0].id); }
+            const nextMissingServices = guests.find(g => g.services.length === 0);
+            if (nextMissingServices) {
+                setActiveGuestId(nextMissingServices.id);
+            } else {
+                // All have services, ready for Step 2 (Staff)
+                setCurrentStep(2);
+                // Find first guest who doesn't have staff selected yet
+                const nextNoStaff = guests.find(g => g.staff === null) || guests[0];
+                setActiveGuestId(nextNoStaff.id);
+            }
         } else if (currentStep === 2) {
             if (guests.every(g => g.staff !== null)) {
+                // All have staff, ready for Step 3 (Time)
                 setGuests(guests.map(g => (g.time && g.time.staffId !== g.staff.id) ? { ...g, time: null } : g));
                 setCurrentStep(3);
-                setActiveGuestId(guests[0].id);
+                // Find first guest who doesn't have time selected yet
+                const nextNoTime = guests.find(g => g.time === null) || guests[0];
+                setActiveGuestId(nextNoTime.id);
             } else {
                 const missing = guests.find(g => g.staff === null);
                 if (missing) setActiveGuestId(missing.id);
@@ -278,13 +315,20 @@ const BookingPage = () => {
 
                     {currentStep === 2 && (
                         <div style={{ padding: '0 16px' }}>
-                            <StaffSelection
-                                key={activeGuestId}
-                                staffMembers={staffData}
-                                onSelect={handleStaffSelect}
-                                guestName={activeGuest.name}
-                                selectedStaffId={activeGuest.staff?.id}
-                            />
+                            {visualLoading ? (
+                                <div className={styles.loadingContainer}>
+                                    <div className={styles.spinner}></div>
+                                    <p>Checking professional's availability...</p>
+                                </div>
+                            ) : (
+                                <StaffSelection
+                                    key={activeGuestId}
+                                    staffMembers={staff}
+                                    onSelect={handleStaffSelect}
+                                    guestName={activeGuest.name}
+                                    selectedStaffId={activeGuest.staff?.id}
+                                />
+                            )}
                         </div>
                     )}
 

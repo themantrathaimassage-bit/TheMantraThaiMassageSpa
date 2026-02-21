@@ -216,6 +216,52 @@ export async function fetchSquareTeamMembers() {
 }
 
 /**
+ * Fetch location details from Square (name, address, hours).
+ */
+export async function fetchSquareLocation() {
+    try {
+        const response = await fetch(`/api/square/v2/locations/${LOCATION_ID}`, {
+            headers: HEADERS,
+        });
+        if (!response.ok) throw new Error('Failed to fetch location');
+        const data = await response.json();
+        const loc = data.location;
+
+        // Map Square business_hours to the format expected by the UI
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const openingHours = (loc.business_hours?.periods || []).map(p => {
+            const formatTime = (t) => {
+                const [h, m] = t.split(':').map(Number);
+                const ampm = h >= 12 ? 'pm' : 'am';
+                const h12 = h % 12 || 12;
+                return `${h12}:${String(m).padStart(2, '0')}${ampm}`;
+            };
+            return {
+                day: days[p.day_of_week === 7 ? 0 : p.day_of_week] || 'Unknown',
+                hours: `${formatTime(p.start_time)} - ${formatTime(p.end_time)}`
+            };
+        });
+
+        // Ensure all days are represented, even if closed
+        const fullHours = days.map(day => {
+            const existing = openingHours.find(h => h.day === day);
+            return existing || { day, hours: 'Closed' };
+        });
+
+        return {
+            name: loc.name,
+            address: `${loc.address?.address_line_1}, ${loc.address?.locality} ${loc.address?.administrative_district_level_1} ${loc.address?.postal_code}`,
+            location: loc.address?.locality + ', ' + loc.address?.administrative_district_level_1,
+            openingHours: fullHours,
+            description: loc.description
+        };
+    } catch (err) {
+        console.error('Failed to fetch Square location:', err);
+        return null;
+    }
+}
+
+/**
  * Get a Square customer booking token for the given customer.
  * This token allows creating bookings on behalf of the customer
  * without requiring the merchant to have an Appointments subscription.

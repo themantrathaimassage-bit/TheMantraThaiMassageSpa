@@ -8,7 +8,7 @@ const PERIODS = [
 ];
 
 const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect }) => {
-    const ACCESS_TOKEN = 'EAAAl9R3a2xUqGKVqDoIuwGrIlbhbSROF91NDP0IQ2sfHGdoz4CFEBZF1DhsyLcT';
+    // LOCATION_ID is used in the search body, so we keep it here or import it
     const LOCATION_ID = 'LY3JYWKY4FHHQ';
 
     const activeGuest = guests?.find(g => g.id === activeGuestId) || guests?.[0];
@@ -164,8 +164,6 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect }) => {
                 const response = await fetch('/api/square/v2/bookings/availability/search', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-                        'Square-Version': '2024-01-17',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(body)
@@ -296,8 +294,6 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect }) => {
                 const res = await fetch('/api/square/v2/bookings/availability/search', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${ACCESS_TOKEN}`,
-                        'Square-Version': '2024-01-17',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(body)
