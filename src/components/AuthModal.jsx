@@ -198,6 +198,11 @@ const AuthModal = () => {
                     <h2 className={styles.title}>
                         {step === 1 ? 'Welcome to The Mantra' : 'Complete your profile'}
                     </h2>
+                    {step === 1 && (
+                        <p className={styles.loginHint}>
+                            Quick book. No passwords.
+                        </p>
+                    )}
                     <p className={styles.subtitle}>
                         {step === 1
                             ? 'Enter your mobile number to get started'

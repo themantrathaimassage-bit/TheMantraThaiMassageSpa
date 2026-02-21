@@ -209,28 +209,37 @@ const BookingPage = () => {
     };
 
     const handleContinue = () => {
-        if (currentStep === 1 && activeGuest.services.length > 0) {
-            const nextMissingServices = guests.find(g => g.services.length === 0);
-            if (nextMissingServices) {
-                setActiveGuestId(nextMissingServices.id);
-            } else {
-                // All have services, ready for Step 2 (Staff)
-                setCurrentStep(2);
-                // Find first guest who doesn't have staff selected yet
-                const nextNoStaff = guests.find(g => g.staff === null) || guests[0];
-                setActiveGuestId(nextNoStaff.id);
+        if (currentStep === 1) {
+            if (activeGuest.services.length > 0) {
+                const nextMissingServices = guests.find(g => g.services.length === 0);
+                if (nextMissingServices) {
+                    setActiveGuestId(nextMissingServices.id);
+                } else {
+                    // All have services, ready for Step 2 (Staff)
+                    setCurrentStep(2);
+                    const nextNoStaff = guests.find(g => g.staff === null) || guests[0];
+                    setActiveGuestId(nextNoStaff.id);
+                }
             }
         } else if (currentStep === 2) {
-            if (guests.every(g => g.staff !== null)) {
-                // All have staff, ready for Step 3 (Time)
-                setGuests(guests.map(g => (g.time && g.time.staffId !== g.staff.id) ? { ...g, time: null } : g));
-                setCurrentStep(3);
-                // Find first guest who doesn't have time selected yet
-                const nextNoTime = guests.find(g => g.time === null) || guests[0];
-                setActiveGuestId(nextNoTime.id);
-            } else {
-                const missing = guests.find(g => g.staff === null);
-                if (missing) setActiveGuestId(missing.id);
+            if (activeGuest.staff !== null) {
+                const nextNoStaff = guests.find(g => g.staff === null);
+                if (nextNoStaff) {
+                    setActiveGuestId(nextNoStaff.id);
+                } else {
+                    // All have staff, ready for Step 3 (Time)
+                    setGuests(guests.map(g => (g.time && g.time.staffId !== g.staff.id) ? { ...g, time: null } : g));
+                    setCurrentStep(3);
+                    const nextNoTime = guests.find(g => g.time === null) || guests[0];
+                    setActiveGuestId(nextNoTime.id);
+                }
+            }
+        } else if (currentStep === 3) {
+            if (activeGuest.time !== null) {
+                const nextNoTime = guests.find(g => g.time === null);
+                if (nextNoTime) {
+                    setActiveGuestId(nextNoTime.id);
+                }
             }
         }
     };
@@ -241,9 +250,28 @@ const BookingPage = () => {
     const handleChangeService = (id) => { setActiveGuestId(id); setCurrentStep(1); };
 
     const handleRemoveService = (guestId, serviceId) => {
-        setGuests(guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId) } : g));
-        setActiveGuestId(guestId);
-        setCurrentStep(1);
+        const updatedGuests = guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId) } : g);
+        setGuests(updatedGuests);
+
+        const totalServices = updatedGuests.reduce((acc, g) => acc + g.services.length, 0);
+        if (totalServices === 0) {
+            setCurrentStep(1);
+            setActiveGuestId(updatedGuests[0].id);
+            return;
+        }
+
+        // Check the guest whose service was removed
+        const targetGuest = updatedGuests.find(g => g.id === guestId);
+        const hasMainServices = targetGuest?.services.some(s => !s.isAddon);
+
+        // If we removed the last main service for this guest (only addons or nothing left), 
+        // we MUST go back to Step 1 so they can add a main service.
+        if (!hasMainServices) {
+            setCurrentStep(1);
+            setActiveGuestId(guestId);
+        }
+        // Otherwise (if they still have at least one main service), we stay on the current step.
+        // The UI will just reflect the removed item in the list.
     };
 
     const handleRemoveAll = () => {
