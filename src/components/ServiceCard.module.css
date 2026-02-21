@@ -146,6 +146,12 @@
     font-weight: 600;
 }
 
+.pillSelected {
+    background-color: #10b981 !important;
+    color: #fff !important;
+    border-color: #059669 !important;
+}
+
 .addButton {
     background-color: #000;
     color: #fff;
@@ -157,6 +163,8 @@
     cursor: pointer;
     transition: all 0.2s;
     flex-shrink: 0;
+    white-space: nowrap;
+    /* Prevent wrapping */
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -170,19 +178,43 @@
     transform: scale(0.97);
 }
 
-/* ── Add-on Card Specifics ── */
-.addonCard {
-    border-left: 3px solid #6366f1;
-    padding-left: 12px !important;
+/* ── Selected State ── */
+.selected {
+    background-color: #f0fdf4;
+    /* Soft success tint */
+    position: relative;
 }
 
-.addonButton {
-    background-color: #6366f1;
+@media (min-width: 768px) {
+    .selected {
+        background-color: #f0fdf4;
+        box-shadow: none;
+    }
 }
 
-@media (hover: hover) {
-    .addonButton:hover {
-        background-color: #4f46e5;
+.selectedButton {
+    background-color: #10b981 !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    /* Even smaller padding */
+    font-size: 12px !important;
+    /* Smaller font to fit */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkIcon {
+    margin-right: 3px;
+    /* Minimal gap */
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .selected {
+        background-color: #f0fdf4;
+        padding-left: 0;
+        border-left: none;
     }
 }
 

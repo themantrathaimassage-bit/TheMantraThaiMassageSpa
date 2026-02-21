@@ -7,11 +7,13 @@ export const CartProvider = ({ children }) => {
 
     const addService = (service) => {
         setSelectedServices((prev) => {
-            const exists = prev.find(s => s.id === service.id);
-            if (!exists) {
-                return [...prev, service];
+            const existingIndex = prev.findIndex(s => s.baseServiceName === service.baseServiceName);
+            if (existingIndex > -1) {
+                const newCart = [...prev];
+                newCart[existingIndex] = service;
+                return newCart;
             }
-            return prev;
+            return [...prev, service];
         });
     };
 

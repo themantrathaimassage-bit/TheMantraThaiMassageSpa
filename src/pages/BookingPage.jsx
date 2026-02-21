@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { FiX, FiChevronLeft } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FiX, FiChevronLeft, FiPhone } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import ServiceList from '../components/ServiceList';
 import StaffSelection from '../components/StaffSelection';
 import TimeSelection from '../components/TimeSelection';
@@ -15,7 +15,6 @@ import styles from './BookingPage.module.css';
 const BookingPage = () => {
     const { selectedServices, clearCart } = useCart();
     const { user, openAuth } = useAuth();
-    const navigate = useNavigate();
     // Restore step from sessionStorage so back-navigation doesn't reset it
     const [currentStep, setCurrentStep] = useState(() => {
         try { return parseInt(sessionStorage.getItem('bk_step') || '1', 10); } catch { return 1; }
@@ -105,8 +104,12 @@ const BookingPage = () => {
     }, []);
 
     const handleServiceSelect = React.useCallback((service) => {
-        const exists = activeGuest.services.find(s => s.id === service.id);
-        if (!exists) {
+        const existingIndex = activeGuest.services.findIndex(s => s.baseServiceName === service.baseServiceName);
+        if (existingIndex > -1) {
+            const newServices = [...activeGuest.services];
+            newServices[existingIndex] = service;
+            updateGuest(activeGuestId, { services: newServices });
+        } else {
             updateGuest(activeGuestId, { services: [...activeGuest.services, service] });
         }
     }, [activeGuest, activeGuestId, updateGuest]);
@@ -198,6 +201,7 @@ const BookingPage = () => {
     const handleBack = () => currentStep > 1 && setCurrentStep(currentStep - 1);
     const handleChangeStaff = (id) => { setActiveGuestId(id); setCurrentStep(2); };
     const handleChangeTime = (id) => { setActiveGuestId(id); setCurrentStep(3); };
+    const handleChangeService = (id) => { setActiveGuestId(id); setCurrentStep(1); };
 
     const handleRemoveService = (guestId, serviceId) => {
         setGuests(guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId) } : g));
@@ -240,6 +244,12 @@ const BookingPage = () => {
                     )}
                     <span className={styles.stepTitle}>{getStepTitle()}</span>
                 </div>
+                <div className={styles.headerRight}>
+                    <a href="tel:0493853415" className={styles.headerCallBtn}>
+                        <FiPhone />
+                        <span className={styles.headerCallText}>0493 853 415</span>
+                    </a>
+                </div>
             </div>
 
             <div className={styles.contentGrid}>
@@ -262,6 +272,7 @@ const BookingPage = () => {
                             hideSeeAll={true}
                             isLoading={servicesLoading}
                             buttonText="Add"
+                            selectedIds={activeGuest.services.map(s => s.id)}
                         />
                     )}
 
@@ -300,6 +311,7 @@ const BookingPage = () => {
                         showContinue={currentStep < 3 && allSelectedServices.length > 0}
                         onChangeStaff={handleChangeStaff}
                         onChangeTime={handleChangeTime}
+                        onChangeService={handleChangeService}
                         onBook={handleBook}
                         isBooking={isBooking}
                         bookingResult={bookingResult}

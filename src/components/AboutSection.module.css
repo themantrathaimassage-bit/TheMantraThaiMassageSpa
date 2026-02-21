@@ -16,24 +16,27 @@
 
 .contentGrid {
     display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 24px;
-    align-items: start;
+    grid-template-columns: 1.4fr 1fr;
+    /* More balanced ratio for desktop */
+    gap: 32px;
+    align-items: stretch;
 }
 
 .mapSide {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .mapFrame {
     width: 100%;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
     line-height: 0;
-    border: 1px solid #f0f0f0;
-    height: 280px;
+    border: 1px solid #eee;
+    height: 100%;
+    /* Take full height of grid row */
+    min-height: 320px;
 }
 
 .addressRow {
@@ -46,80 +49,188 @@
 .addressInfo {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 10px;
+    font-size: 15px;
     color: var(--color-text);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .pinIcon {
-    color: #666;
+    color: #475569;
     flex-shrink: 0;
 }
 
 .directionsLink {
-    font-size: 13px;
-    color: var(--color-text);
+    font-size: 14px;
+    color: #000;
     text-decoration: underline;
-    font-weight: 600;
+    font-weight: 700;
     flex-shrink: 0;
+}
+
+.directionsLink:hover {
+    opacity: 0.7;
 }
 
 .hoursSide {
     background: #ffffff;
-    border-radius: 20px;
+    border-radius: 24px;
     border: 1px solid #f0f0f0;
-    padding: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.hoursHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
 .subtitle {
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0;
     color: var(--color-text);
+}
+
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    padding: 6px 14px;
+    border-radius: 100px;
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #bbf7d0;
+    animation: pulse 2s infinite;
+}
+
+.statusText {
+    font-size: 13px;
+    font-weight: 700;
+    color: #166534;
 }
 
 .hoursList {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
 }
 
 .hourItem {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    line-height: 1;
+    align-items: center;
+    font-size: 14px;
+    padding: 4px 0;
 }
 
 .day {
-    color: var(--color-text);
+    color: #4b5563;
+    font-weight: 500;
 }
 
 .time {
-    color: var(--color-text-light);
-}
-
-.isToday {
+    color: #1e293b;
     font-weight: 700;
 }
 
-.isToday .day,
-.isToday .time {
-    color: #000;
+.isToday {
+    background: #f8fafc;
+    margin: 0 -12px;
+    padding: 8px 12px;
+    border-radius: 12px;
 }
 
-@media (max-width: 991px) {
+.isToday .day {
+    color: #000;
+    font-weight: 700;
+}
+
+.isWeekend .day {
+    color: #64748b;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        gap: 12px;
+    }
+
+    .title {
+        font-size: 18px;
+        padding-left: 4px;
+    }
+
     .contentGrid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
     .hoursSide {
         padding: 16px;
+        border-radius: 16px;
+    }
+
+    .hoursHeader {
+        margin-bottom: 16px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+    }
+
+    .statusText {
+        font-size: 12px;
     }
 
     .mapFrame {
-        height: 240px;
+        height: 200px;
+        /* Reduced map height on mobile */
+        min-height: auto;
+        border-radius: 16px;
+    }
+
+    .addressInfo {
+        font-size: 13px;
+    }
+
+    .directionsLink {
+        font-size: 12px;
+    }
+
+    .hourItem {
+        font-size: 13px;
+        padding: 2px 0;
+    }
+
+    .isToday {
+        margin: 0 -8px;
+        padding: 6px 8px;
     }
 }

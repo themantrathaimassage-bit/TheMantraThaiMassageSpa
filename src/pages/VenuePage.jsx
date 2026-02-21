@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import HeroSection from '../components/HeroSection';
 import { venueData } from '../data/venueData';
 import ServiceList from '../components/ServiceList';
@@ -11,7 +11,6 @@ import StickyBookingCard from '../components/StickyBookingCard';
 import styles from './VenuePage.module.css';
 
 import { useNavigate } from 'react-router-dom';
-import { useSearch } from '../context/SearchContext';
 import { useCart } from '../context/CartContext';
 
 const VenuePage = () => {
@@ -20,8 +19,7 @@ const VenuePage = () => {
     const [servicesLoading, setServicesLoading] = useState(true);
     const [reviews, setReviews] = useState(reviewsData);
 
-    const { searchQuery } = useSearch();
-    const { addService } = useCart();
+    const { addService, selectedServices } = useCart();
     const navigate = useNavigate();
 
     // Data Fetching with AbortController for cleanup
@@ -66,35 +64,6 @@ const VenuePage = () => {
         navigate('/booking');
     }, [addService, navigate]);
 
-    const filteredServices = useMemo(() => {
-        if (!searchQuery) return services;
-        const lower = searchQuery.toLowerCase();
-        return services.map(cat => ({
-            ...cat,
-            items: cat.items.filter(item =>
-                item.name.toLowerCase().includes(lower) ||
-                (item.description && item.description.toLowerCase().includes(lower))
-            )
-        })).filter(cat => cat.items.length > 0);
-    }, [searchQuery, services]);
-
-    // Combined auto-scroll logic
-    useEffect(() => {
-        if (!searchQuery) return;
-        const q = searchQuery.toLowerCase();
-
-        let targetId = null;
-        if (/opening|hour|time|close/.test(q)) targetId = 'opening-hours';
-        else if (/location|map|address|where/.test(q)) targetId = 'location';
-        else if (/review/.test(q)) targetId = 'reviews';
-        else if (filteredServices.length > 0) targetId = 'services';
-
-        if (targetId) {
-            const el = document.getElementById(targetId);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: targetId === 'opening-hours' ? 'center' : 'start' });
-        }
-    }, [searchQuery, filteredServices]);
-
     return (
         <div className={styles.pageContainer}>
             <HeroSection venue={venue} />
@@ -104,11 +73,12 @@ const VenuePage = () => {
                     <section className={styles.sectionWrapper}>
                         <div id="services" style={{ scrollMarginTop: '140px' }}>
                             <ServiceList
-                                services={filteredServices}
+                                services={services}
                                 onServiceSelect={handleServiceSelect}
-                                isSearching={!!searchQuery}
+                                isSearching={false}
                                 isLoading={servicesLoading}
                                 buttonText="Book"
+                                selectedIds={selectedServices.map(s => s.id)}
                             />
                         </div>
                     </section>
@@ -142,4 +112,4 @@ const VenuePage = () => {
     );
 };
 
-export default React.memo(VenuePage);
+export default memo(VenuePage);

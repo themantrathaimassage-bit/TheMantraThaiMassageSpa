@@ -1,20 +1,36 @@
 import React, { useState } from 'react';
+import { FiCheck } from 'react-icons/fi';
 import styles from './ServiceCard.module.css';
 import ServiceDescriptionModal from './ServiceDescriptionModal';
 
-const ServiceCard = ({ service, onSelect, buttonText }) => {
+const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
     const variations = service?.variations || [];
-    const [selectedVarId, setSelectedVarId] = useState(variations[0]?.id);
+    const [selectedVarId, setSelectedVarId] = useState(() => {
+        // Find if any variation of this service is already selected
+        const selectedForThisService = variations.find(v => selectedIds.includes(v.id));
+        return selectedForThisService ? selectedForThisService.id : variations[0]?.id;
+    });
     const [showModal, setShowModal] = useState(false);
 
+    // Sync selectedVarId if selectedIds changes (e.g. after initial load or cross-sync)
+    React.useEffect(() => {
+        const selectedForThisService = variations.find(v => selectedIds.includes(v.id));
+        if (selectedForThisService && selectedForThisService.id !== selectedVarId) {
+            setSelectedVarId(selectedForThisService.id);
+        }
+    }, [selectedIds, variations]);
+
     const activeVar = variations.find(v => v.id === selectedVarId) || variations[0];
+    const isSelected = selectedIds.includes(activeVar?.id);
 
     const handleSelect = (e) => {
         if (e) e.stopPropagation();
         if (!activeVar) return;
+        if (isSelected) return;
 
         const selectedService = {
             ...activeVar,
+            baseServiceName: service.name,
             name: activeVar.fullName || service.name,
             description: service.description,
             isAddon: service.isAddon
@@ -24,12 +40,12 @@ const ServiceCard = ({ service, onSelect, buttonText }) => {
 
     const isAddon = service.isAddon;
 
-    if (!activeVar) return null; // Safety: don't render if variations are missing
+    if (!activeVar) return null;
 
     return (
         <>
             <div
-                className={`${styles.card} ${isAddon ? styles.addonCard : ''}`}
+                className={`${styles.card} ${isAddon ? styles.addonCard : ''} ${isSelected ? styles.selected : ''}`}
                 onClick={() => setShowModal(true)}
             >
                 <div className={styles.mainInfo}>
@@ -57,11 +73,12 @@ const ServiceCard = ({ service, onSelect, buttonText }) => {
                                 {variations.map((v) => (
                                     <button
                                         key={v.id}
-                                        className={`${styles.durationPill} ${selectedVarId === v.id ? styles.pillActive : ''}`}
+                                        className={`${styles.durationPill} ${selectedVarId === v.id ? styles.pillActive : ''} ${selectedIds.includes(v.id) ? styles.pillSelected : ''}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedVarId(v.id);
                                         }}
+                                        disabled={isSelected && selectedVarId === v.id}
                                     >
                                         {v.duration}
                                     </button>
@@ -71,10 +88,16 @@ const ServiceCard = ({ service, onSelect, buttonText }) => {
                     )}
 
                     <button
-                        className={`${styles.addButton} ${isAddon ? styles.addonButton : ''}`}
+                        className={`${styles.addButton} ${isAddon ? styles.addonButton : ''} ${isSelected ? styles.selectedButton : ''}`}
                         onClick={handleSelect}
                     >
-                        {buttonText || (isAddon ? 'Add' : 'Book')}
+                        {isSelected ? (
+                            <>
+                                <FiCheck className={styles.checkIcon} /> Added
+                            </>
+                        ) : (
+                            buttonText || (isAddon ? 'Add' : 'Book')
+                        )}
                     </button>
                 </div>
             </div>

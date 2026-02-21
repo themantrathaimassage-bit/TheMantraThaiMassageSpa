@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import styles from './CartSummary.module.css';
 
-const CartSummary = ({ guests, activeGuestId, totalDuration, totalPrice, onContinue, showContinue, onRemoveService, onRemoveAll, onChangeStaff, onChangeTime, currentStep, onBook, isBooking, bookingResult, bookingErrors, user }) => {
+const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onContinue, showContinue, onRemoveService, onRemoveAll, onChangeStaff, onChangeTime, onChangeService, currentStep, onBook, isBooking, bookingResult, bookingErrors, user }) => {
     const { openAuth, logout } = useAuth();
     const hasServices = guests.some(g => g.services.length > 0);
     const missingServices = guests.find(g => g.services.length === 0);
@@ -34,7 +34,15 @@ const CartSummary = ({ guests, activeGuestId, totalDuration, totalPrice, onConti
             ) : (
                 <div className={styles.cartContent}>
                     <div className={styles.cartHeader}>
-                        <span className={styles.cartTitle}>Selected services</span>
+                        <div className={styles.cartTitleWrapper}>
+                            <div className={styles.cartIconWrapper}>
+                                <span className={styles.cartIcon}>🛍️</span>
+                                <span className={styles.badge}>
+                                    {guests.reduce((acc, g) => acc + g.services.length, 0)}
+                                </span>
+                            </div>
+                            <span className={styles.cartTitle}>Your Selection</span>
+                        </div>
                         <button className={styles.removeAllBtn} onClick={onRemoveAll}>
                             Remove all
                         </button>
@@ -55,9 +63,13 @@ const CartSummary = ({ guests, activeGuestId, totalDuration, totalPrice, onConti
                                         </button>
                                     )}
                                     {guest.time && (
-                                        <span className={styles.guestTime}>
-                                            🕐 {guest.time.time} · {guest.time.date.dayName} {guest.time.date.dayNum} {guest.time.date.month}
-                                        </span>
+                                        <button
+                                            className={styles.guestTime}
+                                            onClick={() => onChangeTime && onChangeTime(guest.id)}
+                                            title="Change time"
+                                        >
+                                            🕐 {guest.time.time} · {guest.time.date.dayName} {guest.time.date.dayNum} {guest.time.date.month} ✎
+                                        </button>
                                     )}
                                 </div>
                                 <ul className={styles.list}>

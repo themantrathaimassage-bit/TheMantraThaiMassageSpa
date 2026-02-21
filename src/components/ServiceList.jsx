@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import ServiceCard from './ServiceCard';
 import styles from './ServiceList.module.css';
 
-const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoading, buttonText }) => {
-    const [activeCategory, setActiveCategory] = useState(services[0]?.category);
+const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoading, buttonText, selectedIds = [] }) => {
+    const [activeCategory, setActiveCategory] = useState(services?.[0]?.category);
     const tabsRef = React.useRef(null);
 
     // Update active category when services change (e.g. after live fetch)
@@ -91,6 +91,7 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
                                         service={service}
                                         onSelect={onServiceSelect}
                                         buttonText={buttonText}
+                                        selectedIds={selectedIds}
                                     />
                                 ))}
                             </div>

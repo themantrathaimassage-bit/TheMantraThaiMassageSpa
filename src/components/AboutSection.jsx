@@ -38,14 +38,25 @@ const AboutSection = ({ venue }) => {
                 </div>
 
                 <div className={styles.hoursSide}>
-                    <h3 className={styles.subtitle}>Opening hours</h3>
+                    <div className={styles.hoursHeader}>
+                        <h3 className={styles.subtitle}>Opening hours</h3>
+                        <div className={styles.statusBadge}>
+                            <span className={styles.statusDot}></span>
+                            <span className={styles.statusText}>Open now</span>
+                        </div>
+                    </div>
                     <div className={styles.hoursList}>
                         {venue.openingHours.map((item, index) => {
                             const currentDayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
                             const isToday = item.day === currentDayName;
+                            const isWeekend = item.day === 'Saturday' || item.day === 'Sunday';
 
                             return (
-                                <div key={index} className={`${styles.hourItem} ${isToday ? styles.isToday : ''}`}>
+                                <div key={index} className={[
+                                    styles.hourItem,
+                                    isToday ? styles.isToday : '',
+                                    isWeekend ? styles.isWeekend : ''
+                                ].join(' ')}>
                                     <span className={styles.day}>{item.day}</span>
                                     <span className={styles.time}>{item.hours}</span>
                                 </div>
