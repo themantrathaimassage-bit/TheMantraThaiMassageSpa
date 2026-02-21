@@ -58,16 +58,30 @@ let tokenData = null;
 let isSyncing = false;
 
 async function loadToken() {
-    if (!db) return null;
-    try {
-        const snapshot = await db.ref(TOKEN_PATH).once('value');
-        return snapshot.val();
-    } catch (err) {
-        return null;
+    let data = null;
+    if (db) {
+        try {
+            const snapshot = await db.ref(TOKEN_PATH).once('value');
+            data = snapshot.val();
+        } catch (err) { }
     }
+
+    if (!data) {
+        try {
+            const fs = await import('fs');
+            const localFile = path.join(__dirname, '.square-token.json');
+            if (fs.existsSync(localFile)) {
+                data = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+            }
+        } catch (err) { }
+    }
+    return data;
 }
 
-loadToken().then(data => { tokenData = data; });
+loadToken().then(data => {
+    tokenData = data;
+    if (tokenData) console.log('✅ Square Token loaded');
+});
 
 // ─── Square OAuth & Sync ─────────────────────────────────────────────────────
 const GOOGLE_API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
@@ -176,6 +190,72 @@ async function refreshSquareToken() {
 }
 
 // ─── API Routes ─────────────────────────────────────────────────────────────
+app.get('/api/square-oauth/auth', (req, res) => {
+    const scope = [
+        'MERCHANT_PROFILE_READ',
+        'PAYMENTS_WRITE',
+        'CUSTOMERS_READ',
+        'CUSTOMERS_WRITE',
+        'APPOINTMENTS_READ',
+        'APPOINTMENTS_WRITE',
+        'APPOINTMENTS_ALL_READ',
+        'APPOINTMENTS_BUSINESS_SETTINGS_READ',
+        'INVENTORY_READ',
+        'CATALOG_READ',
+        'TEAM_READ'
+    ].join(' ');
+
+    const redirectUri = process.env.SQUARE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/square-oauth/callback`;
+    const url = `${SQUARE_BASE_URL}/oauth2/authorize?client_id=${process.env.SQUARE_APP_ID}&scope=${encodeURIComponent(scope)}&session=false&state=82910&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    res.redirect(url);
+});
+
+app.get('/api/square-oauth/callback', async (req, res) => {
+    const { code } = req.query;
+    if (!code) return res.status(400).send('No code provided');
+
+    try {
+        const resp = await fetch(`${SQUARE_BASE_URL}/oauth2/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Square-Version': '2024-01-17' },
+            body: JSON.stringify({
+                client_id: process.env.SQUARE_APP_ID,
+                client_secret: process.env.SQUARE_APP_SECRET,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: process.env.SQUARE_REDIRECT_URI
+            }),
+        });
+
+        const data = await resp.json();
+        if (resp.ok && data.access_token) {
+            tokenData = { ...data, obtained_at: new Date().toISOString() };
+            if (db) await db.ref(TOKEN_PATH).set(tokenData);
+            // Also save to a local file as backup
+            import('fs').then(fs => {
+                fs.writeFileSync(path.join(__dirname, '.square-token.json'), JSON.stringify(tokenData, null, 2));
+            });
+            res.send('<h1>✅ Square Connected!</h1><p>You can close this window and go back to the app.</p>');
+        } else {
+            res.status(500).json(data);
+        }
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+app.get('/api/square-oauth/test', async (req, res) => {
+    if (!tokenData) return res.json({ status: 'offline', advice: 'Visit /api/square-oauth/auth' });
+    const expiresAt = new Date(tokenData.expires_at);
+    const daysLeft = Math.round((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
+    res.json({
+        status: 'online',
+        expires: tokenData.expires_at,
+        daysLeft,
+        env: SQUARE_ENV
+    });
+});
+
 app.get('/api/reviews', async (req, res) => {
     const cached = cache.get('api_reviews');
     if (cached) return res.json(cached);
