@@ -171,38 +171,34 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                         </div>
                     )}
                     {hasServices && allHaveTime && bookingResult !== 'success' && (
-                        <>
+                        <div className={styles.reviewFooter}>
                             {user ? (
-                                <div className={styles.bookingAs}>
-                                    <div className={styles.bookingAsContent}>
-                                        <div className={styles.bookingAsLabel}>
-                                            <span className={styles.bookingAsIcon}>👤</span>
-                                            <span>Booking as</span>
-                                        </div>
-                                        <div className={styles.bookingAsValue} title={user.firstName || user.email}>
-                                            {user.firstName || user.email}
+                                <div className={styles.compactUserRow}>
+                                    <div className={styles.userMinimalInfo}>
+                                        <span className={styles.userInitial}>
+                                            {(user.firstName || user.email || 'U')[0].toUpperCase()}
+                                        </span>
+                                        <div className={styles.userText}>
+                                            <span className={styles.userGreet}>Booking as</span>
+                                            <span className={styles.userNameText}>{user.firstName || user.email.split('@')[0]}</span>
                                         </div>
                                     </div>
-                                    <button onClick={logout} className={styles.logoutInlineBtn}>Logout</button>
+                                    <button onClick={onBook} disabled={isBooking} className={styles.compactBookBtn}>
+                                        {isBooking ? '...' : 'Complete Booking'}
+                                    </button>
                                 </div>
                             ) : (
-                                <div className={styles.loginPrompt}>
-                                    <p className={styles.loginTitle}>Sign in to complete booking</p>
-                                    <p className={styles.loginSubtext}>Secure checkout. No passwords.</p>
-                                    <button onClick={() => openAuth({ returnTo: '/booking' })} className={styles.loginLinkButton}>
-                                        Sign in / Register →
+                                <div className={styles.loginCardCompact}>
+                                    <div className={styles.loginTextSide}>
+                                        <strong>Sign in</strong>
+                                        <span>to complete booking</span>
+                                    </div>
+                                    <button onClick={() => openAuth({ returnTo: '/booking' })} className={styles.compactLoginBtn}>
+                                        Sign in →
                                     </button>
                                 </div>
                             )}
-                            <button
-                                className={styles.bookBtn}
-                                onClick={onBook}
-                                disabled={isBooking}
-                                style={{ opacity: isBooking ? 0.7 : 1 }}
-                            >
-                                {isBooking ? <span className={styles.bookingSpinner}>Booking…</span> : '✓ Make booking'}
-                            </button>
-                        </>
+                        </div>
                     )}
                     {bookingResult === 'error' && bookingErrors.length > 0 && (
                         <div className={styles.bookingError}>
