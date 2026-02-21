@@ -24,9 +24,9 @@ const Header = () => {
                 <div className={styles.right}>
                     {/* Desktop Actions */}
                     <div className={styles.desktopActions}>
-                        <a href="#pricing" className={styles.navLink}>Pricing</a>
-                        <a href="#location" className={styles.navLink}>Location</a>
-                        <a href="#reviews" className={styles.navLink}>What our clients say</a>
+                        <a href="/#services" className={styles.navLink}>Pricing</a>
+                        <a href="/#location" className={styles.navLink}>Location</a>
+                        <a href="/#reviews" className={styles.navLink}>What our clients say</a>
 
                         <a href="tel:0493853415" className={styles.callBtn}>
                             <FiPhone className={styles.btnIcon} />
@@ -80,9 +80,9 @@ const Header = () => {
                         )}
                     </div>
 
-                    <a href="#pricing" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>Pricing</a>
-                    <a href="#location" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>Location</a>
-                    <a href="#reviews" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>What our clients say</a>
+                    <a href="/#services" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>Pricing</a>
+                    <a href="/#location" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>Location</a>
+                    <a href="/#reviews" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>What our clients say</a>
                     <a href="tel:0493853415" className={styles.mobileNavLink} onClick={() => setIsMobileMenuOpen(false)}>
                         <FiPhone style={{ marginRight: '8px' }} /> Call us 0493853415
                     </a>
