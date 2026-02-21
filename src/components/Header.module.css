@@ -26,9 +26,10 @@
 }
 
 .logoImage {
-    height: 48px;
+    height: 75px;
     width: auto;
     object-fit: contain;
+    transform: translateY(4px);
 }
 
 .right {
@@ -247,6 +248,8 @@
     }
 
     .logoImage {
-        height: 36px;
+        height: 65px;
+        /* Larger than 56px header */
+        transform: translateY(2px);
     }
 }
