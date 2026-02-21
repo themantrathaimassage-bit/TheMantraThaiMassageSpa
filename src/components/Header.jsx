@@ -16,9 +16,9 @@ const Header = () => {
         <header className={styles.header}>
             <div className={styles.container}>
                 <div className={styles.left}>
-                    <Link to="/" className={styles.logoLink}>
+                    <div className={styles.logoWrapper}>
                         <img src="/images/logo.png" alt="The Mantra Thai Spa" className={styles.logoImage} />
-                    </Link>
+                    </div>
                 </div>
 
                 <div className={styles.right}>

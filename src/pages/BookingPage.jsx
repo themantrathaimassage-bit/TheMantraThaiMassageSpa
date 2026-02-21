@@ -135,9 +135,9 @@ const BookingPage = () => {
         if (existingIndex > -1) {
             const newServices = [...activeGuest.services];
             newServices[existingIndex] = service;
-            updateGuest(activeGuestId, { services: newServices });
+            updateGuest(activeGuestId, { services: newServices, time: null });
         } else {
-            updateGuest(activeGuestId, { services: [...activeGuest.services, service] });
+            updateGuest(activeGuestId, { services: [...activeGuest.services, service], time: null });
         }
     }, [activeGuest, activeGuestId, updateGuest]);
 
@@ -250,7 +250,7 @@ const BookingPage = () => {
     const handleChangeService = (id) => { setActiveGuestId(id); setCurrentStep(1); };
 
     const handleRemoveService = (guestId, serviceId) => {
-        const updatedGuests = guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId) } : g);
+        const updatedGuests = guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId), time: null } : g);
         setGuests(updatedGuests);
 
         const totalServices = updatedGuests.reduce((acc, g) => acc + g.services.length, 0);
@@ -268,6 +268,10 @@ const BookingPage = () => {
         // we MUST go back to Step 1 so they can add a main service.
         if (!hasMainServices) {
             setCurrentStep(1);
+            setActiveGuestId(guestId);
+        } else if (currentStep === 3) {
+            // If we are on the Time Selection step and just invalidated a guest's time,
+            // move the focus to that guest so they can re-select immediately.
             setActiveGuestId(guestId);
         }
         // Otherwise (if they still have at least one main service), we stay on the current step.
