@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiTrash2, FiChevronUp, FiX, FiCalendar } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,13 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const hasServices = guests.some(g => g.services.length > 0);
     const activeGuest = guests.find(g => g.id === activeGuestId);
 
+    // Listen for booking success to close the mobile overlay
+    useEffect(() => {
+        const handleClose = () => setIsReviewOpen(false);
+        window.addEventListener('closeMobileOverlay', handleClose);
+        return () => window.removeEventListener('closeMobileOverlay', handleClose);
+    }, []);
+
     // Helper to clean up service names that include duration in parentheses
     const formatServiceName = (name) => {
         if (!name) return "";
@@ -17,25 +24,29 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         return name.replace(/\s*\([\d\s\w]+\)\s*/gi, '').trim();
     };
 
-    // Global missing status for messages
+    // 1. Check for missing global status
     const missingServices = guests.find(g => g.services.length === 0);
+    const missingMainService = guests.find(g => g.services.length > 0 && g.services.every(s => s.isAddon));
     const missingStaff = currentStep >= 2 && guests.find(g => g.services.length > 0 && g.staff === null);
     const missingTime = currentStep >= 3 && guests.find(g => g.services.length > 0 && g.time === null);
 
-    // Only disable if the ACTIVE guest is the one with the problem
+    // 2. Active guest specific checks (Only disable button if the CURRENT guest has a problem)
     const isActiveMissingServices = currentStep === 1 && (!activeGuest || activeGuest.services.length === 0);
+    const isActiveOnlyAddons = currentStep === 1 && activeGuest && activeGuest.services.length > 0 && activeGuest.services.every(s => s.isAddon);
     const isActiveMissingStaff = currentStep === 2 && (!activeGuest || activeGuest.staff === null);
     const isActiveMissingTime = currentStep === 3 && (!activeGuest || activeGuest.time === null);
 
-    const isDisabled = isActiveMissingServices || isActiveMissingStaff || isActiveMissingTime;
+    const isDisabled = isActiveMissingServices || isActiveOnlyAddons || isActiveMissingStaff || isActiveMissingTime;
 
     const validationMsg = (currentStep === 1 && missingServices)
         ? `Please select a service for ${missingServices.name}`
-        : (currentStep === 2 && missingStaff)
-            ? `Please select a professional for ${missingStaff.name}`
-            : (currentStep === 3 && missingTime)
-                ? `Please select a time for ${missingTime.name}`
-                : null;
+        : (currentStep === 1 && missingMainService)
+            ? `Please select a main service for ${missingMainService.name} (Add-ons cannot be booked alone)`
+            : (currentStep === 2 && missingStaff)
+                ? `Please select a professional for ${missingStaff.name}`
+                : (currentStep === 3 && missingTime)
+                    ? `Please select a time for ${missingTime.name}`
+                    : null;
 
     const allHaveTime = currentStep === 3 && !missingTime && hasServices;
 
@@ -127,17 +138,14 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                 )
                             ))}
                         </div>
-                        <div className={styles.totalRow}>
-                            <span>Total due</span>
-                            <span>${totalPrice}</span>
-                        </div>
                     </div>
                 )}
 
                 <div className={styles.footer}>
-                    {hasServices && validationMsg && (
-                        <div className={styles.validationMessage}>
-                            {validationMsg}
+                    {hasServices && (
+                        <div className={styles.totalRow}>
+                            <span>Total due</span>
+                            <span>${totalPrice}</span>
                         </div>
                     )}
                     {hasServices && showContinue && (
@@ -195,14 +203,6 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                 {isBooking ? <span className={styles.bookingSpinner}>Booking…</span> : '✓ Make booking'}
                             </button>
                         </>
-                    )}
-                    {bookingResult === 'success' && (
-                        <div className={styles.bookingSuccess}>
-                            <span className={styles.bookingSuccessIcon}>✅</span>
-                            <strong>Success!</strong>
-                            <p>Your appointment has been created.</p>
-                            <Link to="/" className={styles.returnHomeBtn}>Return to home</Link>
-                        </div>
                     )}
                     {bookingResult === 'error' && bookingErrors.length > 0 && (
                         <div className={styles.bookingError}>

@@ -187,6 +187,10 @@ const BookingPage = () => {
                 sessionStorage.removeItem('bk_guests');
                 sessionStorage.removeItem('bk_step');
                 sessionStorage.removeItem('bk_activeGuest');
+
+                // CRITICAL: Close mobile review overlay so the Success Modal is visible
+                const event = new CustomEvent('closeMobileOverlay');
+                window.dispatchEvent(event);
             }
         } catch (err) {
             setBookingErrors([err.message]);

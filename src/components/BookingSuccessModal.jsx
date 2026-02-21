@@ -45,13 +45,26 @@ const BookingSuccessModal = ({ guests, onClose }) => {
                             guest.services.length > 0 && (
                                 <div key={guest.id} className={styles.guestItem}>
                                     <div className={styles.guestHeader}>
-                                        <FiUser className={styles.icon} />
-                                        <span>{guest.name}</span>
+                                        <div className={styles.guestInfoCompact}>
+                                            <FiUser className={styles.icon} />
+                                            <span>{guest.name}</span>
+                                            {guest.staff && (
+                                                <span className={styles.staffBadge}>
+                                                    with {guest.staff.id === 'any' ? 'Any Available' : guest.staff.name}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className={styles.serviceBox}>
                                         {guest.services.map((s, sIdx) => (
-                                            <div key={sIdx} className={styles.serviceName}>
-                                                {s.name.replace(/\s*\([\d\s\w]+\)\s*/gi, '').trim()}
+                                            <div key={sIdx} className={styles.serviceRow}>
+                                                <div className={styles.serviceNameColumn}>
+                                                    <span className={styles.serviceName}>
+                                                        {s.name.replace(/\s*\([\d\s\w]+\)\s*/gi, '').trim()}
+                                                    </span>
+                                                    <span className={styles.serviceSub}>{s.duration}</span>
+                                                </div>
+                                                <span className={styles.servicePrice}>${s.price}</span>
                                             </div>
                                         ))}
                                         <div className={styles.dateTimeLine}>
@@ -68,6 +81,13 @@ const BookingSuccessModal = ({ guests, onClose }) => {
                                 </div>
                             )
                         ))}
+                    </div>
+
+                    <div className={styles.totalSummary}>
+                        <div className={styles.totalRow}>
+                            <span>Total Amount Paid</span>
+                            <span className={styles.totalValue}>${guests.reduce((acc, g) => acc + g.services.reduce((sAcc, s) => sAcc + s.price, 0), 0)}</span>
+                        </div>
                     </div>
                 </div>
 

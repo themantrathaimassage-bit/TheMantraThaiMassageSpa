@@ -26,37 +26,37 @@
 }
 
 .header {
-    padding: 32px 24px 20px;
+    padding: 24px 20px 16px;
     text-align: center;
     background: linear-gradient(to bottom, #f0fdf4 0%, #ffffff 100%);
 }
 
 .successIconWrapper {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
     background-color: #dcfce7;
     color: #16a34a;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 16px;
+    margin: 0 auto 12px;
 }
 
 .successIcon {
-    font-size: 32px;
+    font-size: 24px;
 }
 
 .title {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 800;
     color: #111;
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     letter-spacing: -0.02em;
 }
 
 .subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: #64748b;
     margin: 0;
 }
@@ -82,8 +82,8 @@
 
 .guestHeader {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
     font-size: 11px;
     font-weight: 800;
     color: #94a3b8;
@@ -92,20 +92,60 @@
     margin-bottom: 8px;
 }
 
+.guestInfoCompact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.staffBadge {
+    margin-left: auto;
+    font-size: 10px;
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
 .icon {
     font-size: 12px;
 }
 
-.serviceBox {
+.serviceRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px dashed #f1f5f9;
+}
+
+.serviceRow:last-child {
+    border-bottom: none;
+}
+
+.serviceNameColumn {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .serviceName {
     font-size: 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: #1a1a1a;
+}
+
+.serviceSub {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.servicePrice {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
 }
 
 .dateTimeLine {
@@ -126,12 +166,33 @@
     font-weight: 600;
 }
 
+.totalSummary {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 2px solid #f1f5f9;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.totalValue {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+}
+
 .footer {
-    padding: 24px;
+    padding: 20px;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .homeBtn {
