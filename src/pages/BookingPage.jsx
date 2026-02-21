@@ -6,6 +6,7 @@ import StaffSelection from '../components/StaffSelection';
 import TimeSelection from '../components/TimeSelection';
 import CartSummary from '../components/CartSummary';
 import GuestSelector from '../components/GuestSelector';
+import BookingSuccessModal from '../components/BookingSuccessModal';
 import { fetchSquareServices, createSquareBookings } from '../data/squareCatalog';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +26,7 @@ const BookingPage = () => {
     const [isBooking, setIsBooking] = useState(false);
     const [bookingResult, setBookingResult] = useState(null); // null | 'success' | 'error'
     const [bookingErrors, setBookingErrors] = useState([]);
+    const [successGuests, setSuccessGuests] = useState(null);
 
     // 1. Fetch live catalog and staff on mount (Pre-fetch for speed)
     useEffect(() => {
@@ -178,6 +180,7 @@ const BookingPage = () => {
                 setBookingErrors(errors.map(e => `${e.guest}: ${e.error}`));
                 setBookingResult('error');
             } else {
+                setSuccessGuests([...guests]); // Save current guests before clearing
                 setBookingResult('success');
                 clearCart();
                 setGuests([{ id: 'guest-1', name: 'Guest 1', services: [], staff: null, time: null }]);
@@ -396,6 +399,13 @@ const BookingPage = () => {
                     />
                 </div>
             </div>
+
+            {bookingResult === 'success' && successGuests && (
+                <BookingSuccessModal
+                    guests={successGuests}
+                    onClose={() => setBookingResult(null)}
+                />
+            )}
         </div>
     );
 };

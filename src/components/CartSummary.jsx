@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiTrash2, FiChevronUp, FiX } from 'react-icons/fi';
+import { FiTrash2, FiChevronUp, FiX, FiCalendar } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import styles from './CartSummary.module.css';
@@ -9,6 +9,13 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const { openAuth, logout } = useAuth();
     const hasServices = guests.some(g => g.services.length > 0);
     const activeGuest = guests.find(g => g.id === activeGuestId);
+
+    // Helper to clean up service names that include duration in parentheses
+    const formatServiceName = (name) => {
+        if (!name) return "";
+        // Removes patterns like (30 mins), (1hr), etc.
+        return name.replace(/\s*\([\d\s\w]+\)\s*/gi, '').trim();
+    };
 
     // Global missing status for messages
     const missingServices = guests.find(g => g.services.length === 0);
@@ -54,7 +61,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                         <div className={styles.cartHeader}>
                             <div className={styles.cartTitleWrapper}>
                                 <div className={styles.cartIconWrapper}>
-                                    <span className={styles.cartIcon}>🛍️</span>
+                                    <FiCalendar className={styles.cartIcon} size={22} />
                                     <span className={styles.badge}>{itemCount}</span>
                                 </div>
                                 <span className={styles.cartTitle}>Your Booking</span>
@@ -94,11 +101,16 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                                 <li key={`${guest.id}-${item.id}-${index}`} className={styles.item}>
                                                     <div className={styles.itemMain}>
                                                         <div className={styles.itemInfo}>
-                                                            <span className={styles.itemName}>{item.name}</span>
-                                                            <span className={styles.itemDuration}>{item.duration}</span>
+                                                            <span className={styles.itemName} title={item.name}>
+                                                                {formatServiceName(item.name)}
+                                                            </span>
+                                                            <div className={styles.itemMeta}>
+                                                                <span className={styles.itemDuration}>{item.duration}</span>
+                                                                <span className={styles.itemDot}>•</span>
+                                                                <span className={styles.itemPrice}>${item.price}</span>
+                                                            </div>
                                                         </div>
                                                         <div className={styles.itemAction}>
-                                                            <span className={styles.itemPrice}>${item.price}</span>
                                                             <button
                                                                 className={styles.removeSingleBtn}
                                                                 onClick={() => onRemoveService(guest.id, item.id)}
@@ -154,18 +166,23 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                         <>
                             {user ? (
                                 <div className={styles.bookingAs}>
-                                    <div className={styles.bookingAsMain}>
-                                        <span className={styles.bookingAsIcon}>👤</span>
-                                        <span>Booking as <strong>{user.firstName || user.email}</strong></span>
+                                    <div className={styles.bookingAsContent}>
+                                        <div className={styles.bookingAsLabel}>
+                                            <span className={styles.bookingAsIcon}>👤</span>
+                                            <span>Booking as</span>
+                                        </div>
+                                        <div className={styles.bookingAsValue} title={user.firstName || user.email}>
+                                            {user.firstName || user.email}
+                                        </div>
                                     </div>
                                     <button onClick={logout} className={styles.logoutInlineBtn}>Logout</button>
                                 </div>
                             ) : (
                                 <div className={styles.loginPrompt}>
-                                    <p>Sign in to complete your booking</p>
-                                    <p className={styles.loginSubtext}>Quick book. No passwords.</p>
+                                    <p className={styles.loginTitle}>Sign in to complete booking</p>
+                                    <p className={styles.loginSubtext}>Secure checkout. No passwords.</p>
                                     <button onClick={() => openAuth({ returnTo: '/booking' })} className={styles.loginLinkButton}>
-                                        Sign in / Create account →
+                                        Sign in / Register →
                                     </button>
                                 </div>
                             )}

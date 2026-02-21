@@ -166,6 +166,8 @@
     white-space: nowrap;
     /* Prevent wrapping */
     -webkit-tap-highlight-color: transparent;
+    margin-left: auto;
+    /* Always push to the right */
 }
 
 @media (hover: hover) {
@@ -195,13 +197,13 @@
 .selectedButton {
     background-color: #10b981 !important;
     color: #fff !important;
-    padding: 6px 12px !important;
-    /* Even smaller padding */
-    font-size: 12px !important;
-    /* Smaller font to fit */
+    padding: 8px 24px !important;
+    font-size: 14px !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 90px;
+    /* Ensure enough width for "Added" text */
 }
 
 .checkIcon {
@@ -264,5 +266,11 @@
         padding: 6px 14px;
         font-size: 13px;
         border-radius: 6px;
+    }
+
+    .selectedButton {
+        padding: 6px 14px !important;
+        font-size: 13px !important;
+        min-width: 70px;
     }
 }
