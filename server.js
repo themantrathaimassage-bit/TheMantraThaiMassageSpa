@@ -198,11 +198,10 @@ app.get('/api/square-oauth/auth', (req, res) => {
         'CUSTOMERS_WRITE',
         'APPOINTMENTS_READ',
         'APPOINTMENTS_WRITE',
-        'APPOINTMENTS_ALL_READ',
         'APPOINTMENTS_BUSINESS_SETTINGS_READ',
         'INVENTORY_READ',
-        'CATALOG_READ',
-        'TEAM_READ'
+        'ITEMS_READ',
+        'EMPLOYEES_READ'
     ].join(' ');
 
     const redirectUri = process.env.SQUARE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/square-oauth/callback`;
