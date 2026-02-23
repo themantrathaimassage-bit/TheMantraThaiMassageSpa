@@ -368,3 +368,9 @@
         font-size: 12px;
     }
 }
+.turnstileContainer {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 16px;
+    min-height: 65px;
+}

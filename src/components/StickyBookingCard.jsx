@@ -82,7 +82,14 @@ const StickyBookingCard = ({ venue }) => {
 
                 <div className={styles.location}>
                     <p className={styles.addressText}>{venue.address}</p>
-                    <a href="#" className={styles.directionsLink}>Get directions</a>
+                    <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(venue.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.directionsLink}
+                    >
+                        Get directions
+                    </a>
                 </div>
             </div>
         </div>

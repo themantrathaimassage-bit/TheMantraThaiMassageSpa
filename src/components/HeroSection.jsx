@@ -117,7 +117,6 @@ const HeroSection = ({ venue }) => {
                     <div className={styles.locationRow}>
                         <FiMapPin className={styles.pinIcon} />
                         <span className={styles.address}>{venue.address}</span>
-                        <a href="#about-section" className={styles.mapLink}>Show on map</a>
                     </div>
                 </div>
             </div>

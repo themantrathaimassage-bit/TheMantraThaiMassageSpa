@@ -193,22 +193,34 @@ export async function fetchSquareServices() {
  */
 export async function fetchSquareTeamMembers() {
     try {
-        const response = await fetch('/api/square/v2/team-members/search', {
+        // 1. Try Bookings API (specifically for bookable staff members)
+        const staffRes = await fetch(`/api/square/v2/bookings/staff-members?location_id=${LOCATION_ID}`, {
+            headers: HEADERS,
+        });
+        if (staffRes.ok) {
+            const staffData = await staffRes.json();
+            if (staffData.staff_members && staffData.staff_members.length > 0) {
+                return staffData.staff_members;
+            }
+        }
+
+        // 2. Fallback to Team API search if Bookings API is empty or fails
+        const teamRes = await fetch('/api/square/v2/team-members/search', {
             method: 'POST',
             headers: HEADERS,
             body: JSON.stringify({
                 query: {
                     filter: {
-                        status: 'ACTIVE',
-                        location_ids: [LOCATION_ID]
+                        status: 'ACTIVE'
+                        // Removed location_ids filter to ensure all active staff are found
                     }
                 }
             })
         });
 
-        if (!response.ok) throw new Error('API Error');
-        const data = await response.json();
-        return data.team_members || [];
+        if (!teamRes.ok) throw new Error('API Error');
+        const teamData = await teamRes.json();
+        return teamData.team_members || [];
     } catch (error) {
         console.error('Failed to fetch team members:', error);
         return [];

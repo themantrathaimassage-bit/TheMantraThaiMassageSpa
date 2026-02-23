@@ -9,15 +9,71 @@ import 'dotenv/config';
 import fetch from 'node-fetch';
 import admin from 'firebase-admin';
 
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ─── Performance & Security ──────────────────────────────────────────────────
+// ─── Security & Performance ──────────────────────────────────────────────────
+// 1. Helmet sets secure HTTP headers (including CSP)
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", "https://maps.googleapis.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            imgSrc: ["'self'", "data:", "https://*.googleusercontent.com", "https://*.squareup.com", "https://maps.gstatic.com"],
+            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://maps.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            frameSrc: ["'self'", "https://challenges.cloudflare.com", "https://www.google.com"],
+        },
+    },
+}));
+
+// 2. Rate Limiting to prevent brute-force attacks
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
+
 const cache = new NodeCache({ stdTTL: 600 }); // 10 minutes cache
 app.use(compression());
-app.use(cors());
-app.use(express.json({ limit: '1mb' }));
+
+// 3. Restricted CORS (Update this with your actual production domain)
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl) 
+        // OR requests from allowed domains
+        const isAllowed = !origin ||
+            origin.startsWith('http://localhost') ||
+            origin.startsWith('http://127.0.0.1') ||
+            origin.startsWith('http://192.168.') ||
+            origin === 'https://mantra-thai-massage.onrender.com';
+
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            console.error('Blocked by CORS:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+}));
+
+app.use(express.json({ limit: '500kb' }));
+
+// Simple logger for API calls
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} - ${req.ip}`);
+    }
+    next();
+});
 
 // Static files with Cache-Control for assets
 const ONE_YEAR = 31536000;
@@ -306,6 +362,39 @@ app.all(/\/api\/square\/(.*)/, async (req, res) => {
 app.get('/api/sync-reviews', (req, res) => {
     syncReviews();
     res.json({ status: 'triggered' });
+});
+
+// ─── Turnstile Verification ──────────────────────────────────────────────────
+app.post('/api/verify-turnstile', async (req, res) => {
+    const { token } = req.body;
+    const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+
+    if (!token) return res.status(400).json({ success: false, error: 'Token is missing' });
+    if (!secretKey) {
+        console.warn('⚠️ Turnstile Secret Key is missing in .env, bypassing verification.');
+        return res.json({ success: true, bypass: true });
+    }
+
+    try {
+        const formData = new URLSearchParams();
+        formData.append('secret', secretKey);
+        formData.append('response', token);
+        formData.append('remoteip', req.ip);
+
+        const result = await fetch('https://challenges.cloudflare.com/turnstile/v1/siteverify', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const outcome = await result.json();
+        if (outcome.success) {
+            res.json({ success: true });
+        } else {
+            res.status(403).json({ success: false, error: 'Security challenge failed' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 });
 
 // SPA Fallback

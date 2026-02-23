@@ -37,7 +37,7 @@ const AboutSection = ({ venue }) => {
                     </div>
                 </div>
 
-                <div className={styles.hoursSide}>
+                <div id="opening-hours" className={styles.hoursSide}>
                     <div className={styles.hoursHeader}>
                         <h3 className={styles.subtitle}>Opening hours</h3>
                         <div className={styles.statusBadge}>

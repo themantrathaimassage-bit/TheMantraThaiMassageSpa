@@ -231,7 +231,7 @@
     }
 
     .mapLink {
-        display: none;
+        display: inline-block;
     }
 
     .actions {

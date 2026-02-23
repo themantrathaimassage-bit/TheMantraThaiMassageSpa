@@ -12,6 +12,8 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './BookingPage.module.css';
 
+import { staffData } from '../data/staffData';
+
 const BookingPage = () => {
     const { selectedServices, clearCart } = useCart();
     const { user, openAuth } = useAuth();
@@ -20,7 +22,7 @@ const BookingPage = () => {
         try { return parseInt(sessionStorage.getItem('bk_step') || '1', 10); } catch { return 1; }
     });
     const [services, setServices] = useState([]);
-    const [staff, setStaff] = useState([{ id: 'any', name: 'Any professional', image: null }]);
+    const [staff, setStaff] = useState(staffData); // Default to static data
     const [servicesLoading, setServicesLoading] = useState(true);
     const [staffLoading, setStaffLoading] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
@@ -43,11 +45,26 @@ const BookingPage = () => {
             if (team && team.length > 0) {
                 const formattedTeam = team.map(m => ({
                     id: m.id,
-                    name: m.family_name ? `${m.given_name} ${m.family_name}` : m.given_name,
+                    name: m.display_name || (m.given_name ? `${m.given_name} ${m.family_name || ''}`.trim() : 'Professional'),
                     image: null
                 }));
-                setStaff([{ id: 'any', name: 'Any professional', image: null }, ...formattedTeam]);
+                // Filter to ensure unique IDs (just in case of overlap or data issues)
+                const uniqueTeam = [];
+                const seenIds = new Set();
+                formattedTeam.forEach(member => {
+                    if (!seenIds.has(member.id)) {
+                        seenIds.add(member.id);
+                        uniqueTeam.push(member);
+                    }
+                });
+                setStaff([{ id: 'any', name: 'Any professional', image: null }, ...uniqueTeam]);
+            } else {
+                console.warn('Square API returned no team members, using offline fallback.');
+                setStaff(staffData);
             }
+        }).catch(err => {
+            console.error('Failed to load team members from Square:', err);
+            setStaff(staffData); // Fallback on error
         });
     }, []);
 
