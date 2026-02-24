@@ -42,8 +42,9 @@ const Header = () => {
                                     <FiUser />
                                 </div>
                                 <span className={styles.userName}>{user.firstName}</span>
-                                <button onClick={logout} className={styles.logoutBtn} title="Logout">
-                                    <FiLogOut />
+                                <button onClick={logout} className={styles.logoutTextBtn}>
+                                    <FiLogOut className={styles.logoutIcon} />
+                                    <span>Logout</span>
                                 </button>
                             </div>
                         ) : (
@@ -88,7 +89,12 @@ const Header = () => {
                     </a>
 
                     {user && (
-                        <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className={styles.mobileNavLink}>Logout</button>
+                        <button
+                            onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                            className={`${styles.mobileNavLink} ${styles.mobileLogoutBtn}`}
+                        >
+                            <FiLogOut style={{ marginRight: '8px' }} /> Logout
+                        </button>
                     )}
                 </div>
             )}

@@ -164,17 +164,26 @@ const BookingPage = () => {
         updateGuest(activeGuestId, { staff });
     }, [activeGuestId, updateGuest]);
 
+    const getNextGuestIdForTime = (allGuests) => {
+        const remaining = allGuests.filter(g => g.time === null);
+        if (remaining.length === 0) return null;
+
+        // Prioritize guests with a specific professional
+        const specific = remaining.find(g => g.staff && g.staff.id !== 'any');
+        if (specific) return specific.id;
+
+        // Then those with "Any professional"
+        return remaining[0].id;
+    };
+
     const handleTimeSelect = React.useCallback((guestId, date, time, availability) => {
         const staffId = guests.find(g => g.id === guestId)?.staff?.id;
         const updatedGuests = guests.map(g => g.id === guestId ? { ...g, time: { date, time, availability, staffId } } : g);
         setGuests(updatedGuests);
 
-        const allHaveTime = updatedGuests.every(g => g.time !== null);
-        if (!allHaveTime) {
-            const currentIndex = updatedGuests.findIndex(g => g.id === guestId);
-            const nextGuest = updatedGuests.slice(currentIndex + 1).find(g => g.time === null)
-                || updatedGuests.find(g => g.time === null);
-            if (nextGuest) setActiveGuestId(nextGuest.id);
+        const nextGuestId = getNextGuestIdForTime(updatedGuests);
+        if (nextGuestId) {
+            setActiveGuestId(nextGuestId);
         } else {
             setTimeout(() => {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -254,15 +263,15 @@ const BookingPage = () => {
                     // All have staff, ready for Step 3 (Time)
                     setGuests(guests.map(g => (g.time && g.time.staffId !== g.staff.id) ? { ...g, time: null } : g));
                     setCurrentStep(3);
-                    const nextNoTime = guests.find(g => g.time === null) || guests[0];
-                    setActiveGuestId(nextNoTime.id);
+                    const nextNoTimeId = getNextGuestIdForTime(guests) || guests[0].id;
+                    setActiveGuestId(nextNoTimeId);
                 }
             }
         } else if (currentStep === 3) {
             if (activeGuest.time !== null) {
-                const nextNoTime = guests.find(g => g.time === null);
-                if (nextNoTime) {
-                    setActiveGuestId(nextNoTime.id);
+                const nextNoTimeId = getNextGuestIdForTime(guests);
+                if (nextNoTimeId) {
+                    setActiveGuestId(nextNoTimeId);
                 }
             }
         }
@@ -394,6 +403,7 @@ const BookingPage = () => {
                             activeGuestId={activeGuestId}
                             onGuestSwitch={setActiveGuestId}
                             onSelect={handleTimeSelect}
+                            staffMembers={staff}
                         />
                     )}
                 </div>

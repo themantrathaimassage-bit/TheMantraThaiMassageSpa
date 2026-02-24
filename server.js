@@ -19,15 +19,17 @@ const PORT = process.env.PORT || 3001;
 // ─── Security & Performance ──────────────────────────────────────────────────
 // 1. Helmet sets secure HTTP headers (including CSP)
 app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", "https://maps.googleapis.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             imgSrc: ["'self'", "data:", "https://*.googleusercontent.com", "https://*.squareup.com", "https://maps.gstatic.com"],
-            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://maps.googleapis.com"],
+            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://maps.googleapis.com", "https://cloudflareworkers.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            frameSrc: ["'self'", "https://challenges.cloudflare.com", "https://www.google.com"],
+            frameSrc: ["'self'", "https://challenges.cloudflare.com", "https://www.google.com", "https://maps.google.com"],
         },
     },
 }));
@@ -365,37 +367,7 @@ app.get('/api/sync-reviews', (req, res) => {
 });
 
 // ─── Turnstile Verification ──────────────────────────────────────────────────
-app.post('/api/verify-turnstile', async (req, res) => {
-    const { token } = req.body;
-    const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-
-    if (!token) return res.status(400).json({ success: false, error: 'Token is missing' });
-    if (!secretKey) {
-        console.warn('⚠️ Turnstile Secret Key is missing in .env, bypassing verification.');
-        return res.json({ success: true, bypass: true });
-    }
-
-    try {
-        const formData = new URLSearchParams();
-        formData.append('secret', secretKey);
-        formData.append('response', token);
-        formData.append('remoteip', req.ip);
-
-        const result = await fetch('https://challenges.cloudflare.com/turnstile/v1/siteverify', {
-            method: 'POST',
-            body: formData,
-        });
-
-        const outcome = await result.json();
-        if (outcome.success) {
-            res.json({ success: true });
-        } else {
-            res.status(403).json({ success: false, error: 'Security challenge failed' });
-        }
-    } catch (err) {
-        res.status(500).json({ success: false, error: 'Internal server error' });
-    }
-});
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // SPA Fallback
 app.get(/^\/(?!api).*/, (req, res) => {

@@ -243,7 +243,10 @@ export async function fetchSquareLocation() {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const openingHours = (loc.business_hours?.periods || []).map(p => {
             const formatTime = (t) => {
-                const [h, m] = t.split(':').map(Number);
+                if (!t) return '??:??';
+                const parts = t.split(':');
+                if (parts.length < 2) return t;
+                const [h, m] = parts.map(Number);
                 const ampm = h >= 12 ? 'pm' : 'am';
                 const h12 = h % 12 || 12;
                 return `${h12}:${String(m).padStart(2, '0')}${ampm}`;

@@ -143,12 +143,28 @@
     font-weight: 600;
 }
 
-.logoutBtn {
+.logoutTextBtn {
     background: none;
     border: none;
-    color: #94a3b8;
-    padding: 2px;
+    color: #ef4444;
+    /* Soft red for logout */
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.logoutTextBtn:hover {
+    background-color: #fee2e2;
+}
+
+.logoutIcon {
+    font-size: 14px;
 }
 
 /* Mobile */
@@ -232,6 +248,16 @@
     font-weight: 600;
     font-size: 15px;
     border-bottom: 1px solid #f8fafc;
+    display: flex;
+    align-items: center;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.mobileLogoutBtn {
+    color: #ef4444;
 }
 
 @media (max-width: 768px) {

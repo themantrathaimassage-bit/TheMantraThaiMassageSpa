@@ -6,9 +6,6 @@ import styles from './AuthModal.module.css';
 
 const COUNTRY_CODES = [
     { code: '+61', flag: '🇦🇺', name: 'AU', fullLength: 10, placeholder: '04XX XXX XXX' },
-    { code: '+66', flag: '🇹🇭', name: 'TH', fullLength: 10, placeholder: '08X XXX XXXX' },
-    { code: '+65', flag: '🇸🇬', name: 'SG', fullLength: 8, placeholder: '8XXX XXXX' },
-    { code: '+1', flag: '🇺🇸', name: 'US', fullLength: 10, placeholder: 'XXX XXX XXXX' },
 ];
 
 const AuthModal = () => {
@@ -25,8 +22,6 @@ const AuthModal = () => {
     const fullPhone = `${countryCode}${phone.replace(/^0/, '')}`;
     const country = COUNTRY_CODES.find(c => c.code === countryCode) || COUNTRY_CODES[0];
 
-    const [turnstileToken, setTurnstileToken] = useState(null);
-
     // 1. Reset state and lock scroll when modal opens
     useEffect(() => {
         if (isAuthModalOpen) {
@@ -36,55 +31,12 @@ const AuthModal = () => {
             setPhone('');
             setFirstName('');
             setLastName('');
-            setTurnstileToken(null);
             document.body.style.overflow = 'hidden';
-
-            // Reset Turnstile widget if it exists
-            if (window.turnstile) {
-                window.turnstile.reset();
-            }
         } else {
             document.body.style.overflow = '';
         }
         return () => { document.body.style.overflow = ''; };
     }, [isAuthModalOpen]);
-
-    // Render Turnstile once when modal is ready
-    useEffect(() => {
-        if (isAuthModalOpen && window.turnstile && !turnstileToken) {
-            const widgetId = window.turnstile.render('#turnstile-container', {
-                sitekey: import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY,
-                callback: (token) => {
-                    setTurnstileToken(token);
-                },
-            });
-            return () => {
-                if (widgetId) window.turnstile.remove(widgetId);
-            };
-        }
-    }, [isAuthModalOpen]);
-
-    // Verify turnstile token with backend
-    const verifyTurnstile = async () => {
-        if (!turnstileToken) {
-            setError('Please verify you are human');
-            return false;
-        }
-        try {
-            const res = await fetch('/api/verify-turnstile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: turnstileToken }),
-            });
-            const data = await res.json();
-            if (data.success) return true;
-            setError('Security check failed. Please refresh.');
-            return false;
-        } catch (err) {
-            setError('Security service unavailable');
-            return false;
-        }
-    };
 
     // Clear error when typing
     useEffect(() => {
@@ -138,19 +90,13 @@ const AuthModal = () => {
             return;
         }
 
-        // Must have turnstile token to proceed
-        if (!turnstileToken) {
-            setError('Please verify you are human');
-            return;
-        }
+
 
         setError('');
         setIsLoading(true);
 
         try {
-            // Explicitly verify turnstile token with backend
-            const isHuman = await verifyTurnstile();
-            if (!isHuman) return;
+
 
             const existingCustomer = await searchSquareCustomer(fullPhone);
             if (existingCustomer) {
@@ -187,46 +133,40 @@ const AuthModal = () => {
 
     // 3. Auto-search effect
     useEffect(() => {
-        if (isAuthModalOpen && step === 1 && isCompleteTyping(phone) && turnstileToken) {
+        if (isAuthModalOpen && step === 1 && isCompleteTyping(phone)) {
             const timer = setTimeout(() => {
                 triggerPhoneSearch(false);
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [phone, step, isAuthModalOpen, turnstileToken]);
+    }, [phone, step, isAuthModalOpen]);
 
     if (!isAuthModalOpen) return null;
 
     const handlePhoneSubmit = async (e) => {
         e.preventDefault();
-        if (!turnstileToken) { setError('Please verify you are human'); return; }
-        // If already loading, just set the ref so the existing search knows to move to step 2
-        if (isLoading) {
-            manualSearchRef.current = true;
-            return;
+        setIsLoading(true);
+        setError('');
+        try {
+            await triggerPhoneSearch(true);
+        } catch (err) {
+            setError('Connection error. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
-        triggerPhoneSearch(true);
     };
 
     const handleNameSubmit = async (e) => {
         e.preventDefault();
         if (!firstName) { setError('First name is required'); return; }
-        if (!turnstileToken) { setError('Please verify you are human'); return; }
-
         setError('');
         setIsLoading(true);
-
         try {
-            // Verify turnstile even on step 2 for extra safety
-            const isHuman = await verifyTurnstile();
-            if (!isHuman) return;
-
             const customer = await findOrCreateSquareCustomer({
                 phone: fullPhone,
                 firstName,
                 lastName,
             });
-
             login({
                 squareCustomerId: customer.id,
                 firstName: customer.given_name || firstName,
@@ -281,6 +221,8 @@ const AuthModal = () => {
                                         className={styles.countrySelect}
                                         value={countryCode}
                                         onChange={e => setCountryCode(e.target.value)}
+                                        disabled
+                                        style={{ backgroundColor: '#f9fafb', cursor: 'not-allowed', appearance: 'none' }}
                                     >
                                         {COUNTRY_CODES.map(c => (
                                             <option key={c.code} value={c.code}>
@@ -302,9 +244,11 @@ const AuthModal = () => {
 
                             {error && <div className={styles.error}>{error}</div>}
 
-                            <div id="turnstile-container" className={styles.turnstileContainer}></div>
-
-                            <button type="submit" className={styles.primaryBtn} disabled={isLoading || !turnstileToken}>
+                            <button
+                                type="submit"
+                                className={styles.primaryBtn}
+                                disabled={isLoading}
+                            >
                                 {isLoading ? <span className={styles.loader} /> : <>Continue <FiArrowRight /></>}
                             </button>
                         </form>
@@ -341,9 +285,11 @@ const AuthModal = () => {
 
                             {error && <div className={styles.error}>{error}</div>}
 
-                            <div id="turnstile-container" className={styles.turnstileContainer}></div>
-
-                            <button type="submit" className={styles.primaryBtn} disabled={isLoading || !turnstileToken}>
+                            <button
+                                type="submit"
+                                className={styles.primaryBtn}
+                                disabled={isLoading}
+                            >
                                 {isLoading ? <span className={styles.loader} /> : 'Join & Continue'}
                             </button>
 
