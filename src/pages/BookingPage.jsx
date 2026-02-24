@@ -7,6 +7,7 @@ import TimeSelection from '../components/TimeSelection';
 import CartSummary from '../components/CartSummary';
 import GuestSelector from '../components/GuestSelector';
 import BookingSuccessModal from '../components/BookingSuccessModal';
+import BookingErrorModal from '../components/BookingErrorModal';
 import { fetchSquareServices, createSquareBookings } from '../data/squareCatalog';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -226,6 +227,19 @@ const BookingPage = () => {
         }
     };
 
+    const handleRetryBooking = () => {
+        setBookingResult(null);
+        setBookingErrors([]);
+
+        // Clear selected times for all guests to force re-selection
+        const clearedGuests = guests.map(g => ({ ...g, time: null }));
+        setGuests(clearedGuests);
+
+        // Find the first guest and make them active
+        setActiveGuestId(clearedGuests[0].id);
+        setCurrentStep(3);
+    };
+
     const handleAddGuest = () => {
         const newId = `guest-${Date.now()}`;
         const newGuestNum = guests.length + 1;
@@ -435,6 +449,13 @@ const BookingPage = () => {
                 <BookingSuccessModal
                     guests={successGuests}
                     onClose={() => setBookingResult(null)}
+                />
+            )}
+
+            {bookingResult === 'error' && bookingErrors.length > 0 && (
+                <BookingErrorModal
+                    errors={bookingErrors}
+                    onRetry={handleRetryBooking}
                 />
             )}
         </div>

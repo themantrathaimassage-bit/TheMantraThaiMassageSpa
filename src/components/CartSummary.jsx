@@ -200,12 +200,6 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                             )}
                         </div>
                     )}
-                    {bookingResult === 'error' && bookingErrors.length > 0 && (
-                        <div className={styles.bookingError}>
-                            <strong>⚠️ Booking failed</strong>
-                            {bookingErrors.map((e, i) => <p key={i}>{e}</p>)}
-                        </div>
-                    )}
                 </div>
             </div>
 

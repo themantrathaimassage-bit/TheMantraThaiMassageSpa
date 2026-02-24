@@ -35,15 +35,12 @@ const VenuePage = () => {
             if (!controller.signal.aborted) setServicesLoading(false);
         });
 
-        // Fetch Location Info
+        // Fetch Location Info (Opening Hours only, to prevent overwriting address with Bowral)
         import('../data/squareCatalog').then(m => m.fetchSquareLocation()).then(liveLoc => {
             if (!controller.signal.aborted && liveLoc) {
                 setVenue(prev => ({
                     ...prev,
-                    ...liveLoc,
-                    // Preserve rating/reviewCount if already fetched from reviews
-                    rating: prev.rating,
-                    reviewCount: prev.reviewCount
+                    openingHours: liveLoc.openingHours || prev.openingHours
                 }));
             }
         });

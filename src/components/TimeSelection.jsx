@@ -191,7 +191,7 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                     const newMap = {};
                     const slots = new Set();
                     const now = new Date();
-                    const leadTimeMs = 5 * 60000;
+                    const leadTimeMs = 30 * 60000;
 
                     allAvs.forEach(av => {
                         const t = new Date(av.start_at);
@@ -246,7 +246,7 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
             const periodSlots = allPossible.filter(s => {
                 const hour = parseInt(s.split(':')[0]);
                 if (!p.test(hour)) return false;
-                if (isToday && timeToMinutes(s) < currentMins + 5) return false;
+                if (isToday && timeToMinutes(s) < currentMins + 30) return false;
                 return true;
             });
 

@@ -361,6 +361,8 @@ export async function createSquareBookings(guests, customerId) {
                 // Friendly mapping for race conditions
                 if (msg.includes('time slot is no longer available')) {
                     msg = 'Sorry, this time slot was just taken. Please select another time.';
+                } else if (msg.includes('only be made in the future')) {
+                    msg = 'This time slot has already passed. Please select a future time.';
                 } else if (err?.category === 'AUTHENTICATION_ERROR') {
                     msg = 'Session expired, please refresh.';
                 }
@@ -373,7 +375,31 @@ export async function createSquareBookings(guests, customerId) {
     });
 
     const results = await Promise.all(bookingPromises);
-    return results.filter(Boolean);
+    const validResults = results.filter(Boolean);
+
+    // Rollback logic: if any booking failed, cancel all successful ones in this batch.
+    const hasError = validResults.some(r => r.error);
+    if (hasError) {
+        const successes = validResults.filter(r => !r.error && !r.skipped && r.booking?.id);
+        const cancelPromises = successes.map(async (r) => {
+            try {
+                await fetch(`/api/square/v2/bookings/${r.booking.id}/cancel`, {
+                    method: 'POST',
+                    headers: HEADERS,
+                    body: JSON.stringify({
+                        idempotency_key: `cancel-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+                    })
+                });
+            } catch (e) {
+                console.error(`Failed to rollback booking ${r.booking.id}`, e);
+            }
+            // Overwrite result so UI knows this person wasn't booked either due to rollback
+            r.error = 'Booking aborted because another guest\'s booking failed.';
+        });
+        await Promise.all(cancelPromises);
+    }
+
+    return validResults;
 }
 
 /**
