@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import NodeCache from 'node-cache';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import 'dotenv/config';
@@ -90,9 +90,18 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 }));
 
 // ─── Firebase Setup ─────────────────────────────────────────────────────────
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    try {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+try {
+    let serviceAccount = null;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    } else {
+        const localPath = path.join(__dirname, 'firebase-service-account.json');
+        if (existsSync(localPath)) {
+            serviceAccount = JSON.parse(readFileSync(localPath, 'utf8'));
+        }
+    }
+
+    if (serviceAccount) {
         const projectId = serviceAccount.project_id;
         const dbUrl = process.env.FIREBASE_DATABASE_URL || `https://${projectId}-default-rtdb.asia-southeast1.firebasedatabase.app`;
 
@@ -103,9 +112,11 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
             });
         }
         console.log(`✅ Firebase initialized: ${projectId}`);
-    } catch (err) {
-        console.error('❌ Firebase init failed:', err.message);
+    } else {
+        console.log('⚠️ Firebase initialized skipped: No service account provided');
     }
+} catch (err) {
+    console.error('❌ Firebase init failed:', err.message);
 }
 
 const db = admin.apps.length ? admin.database() : null;
@@ -161,6 +172,14 @@ async function syncReviews() {
         if (db) {
             const snap = await db.ref('square/googleReviewsData/reviews').once('value');
             if (snap.exists()) existing = snap.val() || [];
+        } else {
+            try {
+                const fs = await import('fs');
+                const localFile = path.join(__dirname, '.reviews.json');
+                if (fs.existsSync(localFile)) {
+                    existing = JSON.parse(fs.readFileSync(localFile, 'utf8')).reviews || [];
+                }
+            } catch (ignore) { }
         }
 
         const nowSec = Math.floor(Date.now() / 1000);
@@ -195,14 +214,23 @@ async function syncReviews() {
             .sort((a, b) => (b.rawTime || 0) - (a.rawTime || 0))
             .slice(0, 50);
 
-        if (final.length > 0 && db) {
-            await db.ref('square/reviews').set(final);
-            await db.ref('square/googleReviewsData').set({
+        if (final.length > 0) {
+            const reviewsDataObj = {
                 reviews: final,
                 rating: data.result.rating || 5.0,
                 user_ratings_total: data.result.user_ratings_total || 0,
-            });
-            cache.del('api_reviews'); // Invalidate cache
+            };
+
+            if (db) {
+                await db.ref('square/reviews').set(final);
+                await db.ref('square/googleReviewsData').set(reviewsDataObj);
+            } else {
+                try {
+                    const fs = await import('fs');
+                    fs.writeFileSync(path.join(__dirname, '.reviews.json'), JSON.stringify(reviewsDataObj, null, 2));
+                } catch (ignore) { }
+            }
+            cache.set('api_reviews', reviewsDataObj, 1800); // 30 mins
         }
     } catch (err) {
         console.error('❌ Sync failed:', err.message);
@@ -322,7 +350,15 @@ app.get('/api/reviews', async (req, res) => {
             const snap = await db.ref('square/googleReviewsData').once('value');
             if (snap.exists()) {
                 const data = snap.val();
-                cache.set('api_reviews', data, 1800); // Cache for 30 mins
+                cache.set('api_reviews', data, 1800);
+                return res.json(data);
+            }
+        } else {
+            const fs = await import('fs');
+            const localFile = path.join(__dirname, '.reviews.json');
+            if (fs.existsSync(localFile)) {
+                const data = JSON.parse(fs.readFileSync(localFile, 'utf8'));
+                cache.set('api_reviews', data, 1800);
                 return res.json(data);
             }
         }

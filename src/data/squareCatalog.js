@@ -241,6 +241,10 @@ export async function fetchSquareLocation() {
 
         // Map Square business_hours to the format expected by the UI
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayMap = {
+            'SUN': 'Sunday', 'MON': 'Monday', 'TUE': 'Tuesday', 'WED': 'Wednesday',
+            'THU': 'Thursday', 'FRI': 'Friday', 'SAT': 'Saturday'
+        };
         const openingHours = (loc.business_hours?.periods || []).map(p => {
             const formatTime = (t) => {
                 if (!t) return '??:??';
@@ -252,8 +256,8 @@ export async function fetchSquareLocation() {
                 return `${h12}:${String(m).padStart(2, '0')}${ampm}`;
             };
             return {
-                day: days[p.day_of_week === 7 ? 0 : p.day_of_week] || 'Unknown',
-                hours: `${formatTime(p.start_time)} - ${formatTime(p.end_time)}`
+                day: dayMap[p.day_of_week] || days[p.day_of_week === 7 ? 0 : p.day_of_week] || 'Unknown',
+                hours: `${formatTime(p.start_local_time || p.start_time)} - ${formatTime(p.end_local_time || p.end_time)}`
             };
         });
 
