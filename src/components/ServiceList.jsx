@@ -1,19 +1,37 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FiChevronDown } from 'react-icons/fi';
 import ServiceCard from './ServiceCard';
+import AddonCard from './AddonCard';
 import styles from './ServiceList.module.css';
 
+// Detect if a category group is an "add-on" category
+const isAddonGroup = (group) => {
+    const name = group.category.toLowerCase();
+    // Only match explicitly add-on category names
+    const isNameMatch = name === 'add-ons' || name === 'add ons' || name === 'enhancements' ||
+        name === 'enhancement' || name === 'upgrades' || name === 'upgrade';
+    // Or if ALL items (and there are items) are flagged as addon
+    const allAddons = group.items.length > 0 && group.items.every(s => s.isAddon);
+    return isNameMatch || allAddons;
+};
+
 const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoading, buttonText, selectedIds = [] }) => {
-    const [activeCategory, setActiveCategory] = useState(services?.[0]?.category);
+    const mainServices = services.filter(g => !isAddonGroup(g));
+    const addonServices = services.filter(g => isAddonGroup(g));
+
+    // Check if any selected item is a main (non-addon) service
+    const allItems = services.flatMap(g => g.items || []);
+    const hasMainService = allItems.some(s => !s.isAddon && s.variations?.some(v => selectedIds.includes(v.id)));
+
+    const [activeCategory, setActiveCategory] = useState(mainServices?.[0]?.category);
+    const [addonOpen, setAddonOpen] = useState(() => window.innerWidth > 768);
     const tabsRef = React.useRef(null);
 
     // Update active category when services change (e.g. after live fetch)
     React.useEffect(() => {
-        if (services.length > 0) {
-            setActiveCategory(prev => {
-                const stillExists = services.some(g => g.category === prev);
-                return stillExists ? prev : services[0].category;
-            });
+        if (mainServices.length > 0) {
+            setActiveCategory(mainServices[0].category);
         }
     }, [services]);
 
@@ -35,8 +53,10 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
         setActiveCategory(category);
     };
 
-    // If searching, show all categories. Otherwise, filter by active tab.
-    const displayServices = isSearching ? services : services.filter(group => group.category === activeCategory);
+    // If searching, show all main categories. Otherwise, filter by active tab.
+    const displayServices = isSearching
+        ? mainServices
+        : mainServices.filter(group => group.category === activeCategory);
 
     // Loading skeleton
     if (isLoading) {
@@ -63,10 +83,10 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
 
     return (
         <div className={styles.container}>
-            {!isSearching && (
+            {!isSearching && mainServices.length > 0 && (
                 <div className={styles.tabsContainer} ref={tabsRef}>
                     <div className={styles.tabsInner}>
-                        {services.map((group) => (
+                        {mainServices.map((group) => (
                             <button
                                 key={group.category}
                                 className={`${styles.categoryTab} ${activeCategory === group.category ? styles.tabActive : ''}`}
@@ -92,6 +112,7 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
                                         onSelect={onServiceSelect}
                                         buttonText={buttonText}
                                         selectedIds={selectedIds}
+                                        hasMainService={hasMainService}
                                     />
                                 ))}
                             </div>
@@ -101,6 +122,43 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
                     <div className={styles.noResults}>No services found matching your search.</div>
                 )}
             </div>
+
+            {/* ── Add-on Section ── */}
+            {addonServices.length > 0 && addonServices.some(g => g.items.length > 0) && (() => {
+                const allAddonItems = addonServices.flatMap(g => g.items);
+                const selectedCount = allAddonItems.filter(s =>
+                    s.variations?.some(v => selectedIds.includes(v.id))
+                ).length;
+                return (
+                    <div className={styles.addonSection}>
+                        <button
+                            className={styles.addonHeader}
+                            onClick={() => setAddonOpen(p => !p)}
+                        >
+                            <span className={styles.addonTitle}>
+                                Add-ons
+                                {!addonOpen && selectedCount > 0 && (
+                                    <span className={styles.addonBadge}>{selectedCount} selected</span>
+                                )}
+                            </span>
+                            <FiChevronDown
+                                size={16}
+                                className={`${styles.addonChevron} ${addonOpen ? styles.addonChevronOpen : ''}`}
+                            />
+                        </button>
+                        <div className={`${styles.addonGrid} ${addonOpen ? styles.addonGridOpen : styles.addonGridClosed}`}>
+                            {allAddonItems.map((service) => (
+                                <AddonCard
+                                    key={service.name}
+                                    service={service}
+                                    onSelect={onServiceSelect}
+                                    selectedIds={selectedIds}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                );
+            })()}
 
             {!hideSeeAll && (
                 <Link to="/booking" className={styles.seeAllBtn}>
@@ -112,3 +170,5 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
 };
 
 export default ServiceList;
+
+

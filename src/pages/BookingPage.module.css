@@ -115,6 +115,13 @@
     }
 }
 
+@media (max-width: 768px) {
+    .contentGrid {
+        /* Enough space so floatingBar (60px) + gap (16px) + safe area doesn't cover content */
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
 .loadingContainer {
     display: flex;
     flex-direction: column;

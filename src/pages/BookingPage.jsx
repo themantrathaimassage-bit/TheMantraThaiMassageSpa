@@ -8,6 +8,7 @@ import CartSummary from '../components/CartSummary';
 import GuestSelector from '../components/GuestSelector';
 import BookingSuccessModal from '../components/BookingSuccessModal';
 import BookingErrorModal from '../components/BookingErrorModal';
+import CashOnlyModal from '../components/CashOnlyModal';
 import { fetchSquareServices, createSquareBookings } from '../data/squareCatalog';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +31,7 @@ const BookingPage = () => {
     const [bookingResult, setBookingResult] = useState(null); // null | 'success' | 'error'
     const [bookingErrors, setBookingErrors] = useState([]);
     const [successGuests, setSuccessGuests] = useState(null);
+    const [showCashModal, setShowCashModal] = useState(false);
 
     // 1. Fetch live catalog and staff on mount (Pre-fetch for speed)
     useEffect(() => {
@@ -151,6 +153,17 @@ const BookingPage = () => {
     }, []);
 
     const handleServiceSelect = React.useCallback((service) => {
+        // If it's an add-on already selected → toggle off (remove)
+        if (service.isAddon) {
+            const alreadySelected = activeGuest.services.find(s => s.id === service.id);
+            if (alreadySelected) {
+                updateGuest(activeGuestId, {
+                    services: activeGuest.services.filter(s => s.id !== service.id),
+                    time: null
+                });
+                return;
+            }
+        }
         const existingIndex = activeGuest.services.findIndex(s => s.baseServiceName === service.baseServiceName);
         if (existingIndex > -1) {
             const newServices = [...activeGuest.services];
@@ -192,11 +205,30 @@ const BookingPage = () => {
         }
     }, [guests]);
 
+    // Check if any selected service is a Cash Only promo
+    const hasCashOnlyService = guests.some(g =>
+        g.services.some(s => s.name?.toLowerCase().includes('cash only') || s.baseServiceName?.toLowerCase().includes('cash only'))
+    );
+
     const handleBook = async () => {
         if (!user) {
             openAuth({ returnTo: '/booking' });
             return;
         }
+        // Show cash-only confirmation first
+        if (hasCashOnlyService) {
+            setShowCashModal(true);
+            return;
+        }
+        await executeBooking();
+    };
+
+    const handleCashConfirm = async () => {
+        setShowCashModal(false);
+        await executeBooking();
+    };
+
+    const executeBooking = async () => {
         setIsBooking(true);
         setBookingResult(null);
         setBookingErrors([]);
@@ -207,15 +239,13 @@ const BookingPage = () => {
                 setBookingErrors(errors.map(e => `${e.guest}: ${e.error}`));
                 setBookingResult('error');
             } else {
-                setSuccessGuests([...guests]); // Save current guests before clearing
+                setSuccessGuests([...guests]);
                 setBookingResult('success');
                 clearCart();
                 setGuests([{ id: 'guest-1', name: 'Guest 1', services: [], staff: null, time: null }]);
                 sessionStorage.removeItem('bk_guests');
                 sessionStorage.removeItem('bk_step');
                 sessionStorage.removeItem('bk_activeGuest');
-
-                // CRITICAL: Close mobile review overlay so the Success Modal is visible
                 const event = new CustomEvent('closeMobileOverlay');
                 window.dispatchEvent(event);
             }
@@ -456,6 +486,13 @@ const BookingPage = () => {
                 <BookingErrorModal
                     errors={bookingErrors}
                     onRetry={handleRetryBooking}
+                />
+            )}
+
+            {showCashModal && (
+                <CashOnlyModal
+                    onConfirm={handleCashConfirm}
+                    onCancel={() => setShowCashModal(false)}
                 />
             )}
         </div>

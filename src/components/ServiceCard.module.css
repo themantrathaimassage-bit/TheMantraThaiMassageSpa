@@ -274,3 +274,12 @@
         min-width: 70px;
     }
 }
+
+/* ── Add-on tag ── */
+.addonTag {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 500;
+    margin-top: 2px;
+    display: block;
+}

@@ -73,13 +73,28 @@ export async function findOrCreateSquareCustomer({ phone, firstName = '', lastNa
  * Returns data in the same format as servicesData.js:
  * [{ category: string, items: [{ id, name, duration, durationMs, price, description, isAddon }] }]
  */
+
+// Simple in-memory cache to avoid hitting Square rate limits (5 min TTL)
+let _servicesCache = null;
+let _servicesCacheTime = 0;
+const SERVICES_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export async function fetchSquareServices() {
+    // Return cache if still fresh
+    if (_servicesCache && (Date.now() - _servicesCacheTime) < SERVICES_CACHE_TTL) {
+        return _servicesCache;
+    }
     try {
         const response = await fetch('/api/square/v2/catalog/list?types=ITEM,CATEGORY', {
             headers: HEADERS,
         });
 
         if (!response.ok) {
+            // If rate limited, return stale cache if available
+            if (response.status === 429 && _servicesCache) {
+                console.warn('Square rate limited — serving stale catalog cache');
+                return _servicesCache;
+            }
             throw new Error(`Square API error: ${response.status}`);
         }
 
@@ -142,7 +157,9 @@ export async function fetchSquareServices() {
                 const price = priceMoney ? Math.round(priceMoney.amount / 100) : 0;
                 const duration = formatDuration(durationMs);
 
+                const description = itemData.description || '';
                 const isAddon = durationMs === 0 ||
+                    description.includes('[ADD ON]') ||
                     categoryName.toLowerCase().includes('add') ||
                     categoryName.toLowerCase().includes('enhancement') ||
                     itemData.name?.toLowerCase().includes('add-on') ||
@@ -150,6 +167,9 @@ export async function fetchSquareServices() {
                     itemData.name?.toLowerCase().includes('add on');
 
                 grouped[categoryName].services[itemName].isAddon = isAddon;
+                // Strip [ADD ON] tag from description for display
+                grouped[categoryName].services[itemName].description =
+                    description.replace(/\[ADD ON\]/gi, '').trim();
                 grouped[categoryName].services[itemName].variations.push({
                     id: variation.id,
                     version: variation.version,
@@ -176,15 +196,20 @@ export async function fetchSquareServices() {
                 return { category, services: servicesList, ordinal: data.ordinal };
             })
             .filter(cat => cat.services.length > 0)
-            .sort((a, b) => b.ordinal - a.ordinal)
+            .sort((a, b) => a.ordinal - b.ordinal)
             .map(({ category, services }) => ({ category, items: services })); // name "items" kept for backward compat maybe, but it's now services
 
+
+        // Save to cache
+        _servicesCache = result;
+        _servicesCacheTime = Date.now();
 
         return result;
 
     } catch (error) {
         console.error('Failed to fetch Square catalog:', error);
-        return null;
+        // Return stale cache on any error rather than null
+        return _servicesCache || null;
     }
 }
 

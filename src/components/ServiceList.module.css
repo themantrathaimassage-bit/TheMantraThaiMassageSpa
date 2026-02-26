@@ -205,3 +205,74 @@
         background-position: -200% 0;
     }
 }
+
+/* ── Add-on Section ── */
+.addonSection {
+    margin-top: 4px;
+    margin-bottom: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.addonHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 4px 0 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.addonTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.addonBadge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #111;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.addonChevron {
+    color: #aaa;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.addonChevronOpen {
+    transform: rotate(180deg);
+}
+
+.addonGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+}
+
+.addonGridOpen {
+    max-height: 600px;
+    opacity: 1;
+}
+
+.addonGridClosed {
+    max-height: 0;
+    opacity: 0;
+}

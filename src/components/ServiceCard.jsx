@@ -6,13 +6,12 @@ import ServiceDescriptionModal from './ServiceDescriptionModal';
 const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
     const variations = service?.variations || [];
     const [selectedVarId, setSelectedVarId] = useState(() => {
-        // Find if any variation of this service is already selected
         const selectedForThisService = variations.find(v => selectedIds.includes(v.id));
         return selectedForThisService ? selectedForThisService.id : variations[0]?.id;
     });
     const [showModal, setShowModal] = useState(false);
 
-    // Sync selectedVarId if selectedIds changes (e.g. after initial load or cross-sync)
+    // Sync selectedVarId if selectedIds changes
     React.useEffect(() => {
         const selectedForThisService = variations.find(v => selectedIds.includes(v.id));
         if (selectedForThisService && selectedForThisService.id !== selectedVarId) {
@@ -22,6 +21,7 @@ const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
 
     const activeVar = variations.find(v => v.id === selectedVarId) || variations[0];
     const isSelected = selectedIds.includes(activeVar?.id);
+    const isAddon = service.isAddon;
 
     const handleSelect = (e) => {
         if (e) e.stopPropagation();
@@ -38,14 +38,12 @@ const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
         onSelect(selectedService);
     };
 
-    const isAddon = service.isAddon;
-
     if (!activeVar) return null;
 
     return (
         <>
             <div
-                className={`${styles.card} ${isAddon ? styles.addonCard : ''} ${isSelected ? styles.selected : ''}`}
+                className={`${styles.card} ${isSelected ? styles.selected : ''}`}
                 onClick={() => setShowModal(true)}
             >
                 <div className={styles.mainInfo}>
@@ -63,6 +61,11 @@ const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
                             </p>
                             <span className={styles.moreLink}>read more</span>
                         </div>
+                    )}
+
+                    {/* Subtle add-on hint tag */}
+                    {isAddon && (
+                        <span className={styles.addonTag}>Add-on</span>
                     )}
                 </div>
 
@@ -88,13 +91,11 @@ const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
                     )}
 
                     <button
-                        className={`${styles.addButton} ${isAddon ? styles.addonButton : ''} ${isSelected ? styles.selectedButton : ''}`}
+                        className={`${styles.addButton} ${isSelected ? styles.selectedButton : ''}`}
                         onClick={handleSelect}
                     >
                         {isSelected ? (
-                            <>
-                                <FiCheck className={styles.checkIcon} /> Added
-                            </>
+                            <><FiCheck className={styles.checkIcon} /> Added</>
                         ) : (
                             buttonText || (isAddon ? 'Add' : 'Book')
                         )}

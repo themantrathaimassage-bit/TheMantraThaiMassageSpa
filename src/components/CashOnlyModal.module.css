@@ -1,0 +1,241 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+@media (min-width: 500px) {
+    .backdrop {
+        align-items: center;
+    }
+}
+
+.modal {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 500px) {
+    .modal {
+        border-radius: 20px;
+        margin: 16px;
+    }
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+}
+
+.iconWrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #fef3c7;
+    color: #d97706;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeBtn {
+    background: #f3f4f6;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    transition: background 0.15s;
+}
+
+.closeBtn:hover {
+    background: #e5e7eb;
+}
+
+/* Body */
+.body {
+    padding: 16px 20px 20px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+    margin: 12px 0 6px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0 0 16px;
+}
+
+.infoBox {
+    display: flex;
+    gap: 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.infoIcon {
+    font-size: 24px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.infoTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0 0 6px;
+}
+
+.infoList {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.infoList li {
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.4;
+}
+
+/* Checkbox row */
+.checkRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.checkRow:active {
+    transform: scale(0.99);
+}
+
+.checkRowChecked {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.checkIcon {
+    color: #9ca3af;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: color 0.15s;
+}
+
+.checkRowChecked .checkIcon {
+    color: #10b981;
+}
+
+.checkLabel {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.cancelBtn {
+    flex: 1;
+    padding: 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.cancelBtn:hover {
+    background: #f3f4f6;
+}
+
+.confirmBtn {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: #111;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+}
+
+.confirmBtn:hover:not(:disabled) {
+    background: #333;
+}
+
+.confirmDisabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

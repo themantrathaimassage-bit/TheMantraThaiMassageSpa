@@ -206,28 +206,25 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
             {/* Mobile Floating Bar */}
             {hasServices && !isReviewOpen && bookingResult !== 'success' && (
                 <div className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}>
-                    {isDisabled && validationMsg ? (
-                        <div className={styles.floatingValidation}>
-                            <span className={styles.validationText}>{validationMsg}</span>
-                        </div>
-                    ) : (
-                        <div className={styles.floatingInfo} onClick={() => setIsReviewOpen(true)}>
-                            <div className={styles.floatingText}>
+                    {/* Always tappable "Your Booking" area */}
+                    <div className={styles.floatingInfo} onClick={() => setIsReviewOpen(true)}>
+                        <div className={styles.floatingText}>
+                            {isDisabled && validationMsg ? (
+                                <span className={styles.validationText}>{validationMsg}</span>
+                            ) : (
                                 <span className={styles.floatingTitle}>Your Booking</span>
-                                <span className={styles.floatingDetails}>
-                                    {itemCount} {itemCount === 1 ? 'item' : 'items'} • <strong>${totalPrice}</strong>
-                                </span>
-                            </div>
-                            <FiChevronUp className={styles.floatingChevron} />
+                            )}
+                            <span className={styles.floatingDetails}>
+                                {itemCount} {itemCount === 1 ? 'item' : 'items'} • <strong>${totalPrice}</strong>
+                            </span>
                         </div>
-                    )}
+                        <FiChevronUp className={styles.floatingChevron} />
+                    </div>
 
                     {showContinue && (
                         <button
                             className={`${styles.floatingContinueBtn} ${isDisabled ? styles.floatingDisabledBtn : ''}`}
-                            onClick={() => {
-                                if (!isDisabled) onContinue();
-                            }}
+                            onClick={() => { if (!isDisabled) onContinue(); }}
                         >
                             Continue
                         </button>
