@@ -508,6 +508,29 @@
     color: white;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 4px 3px;
+}
+
+/* Confirmed + overtime slot — amber filled */
+.pillConfirmedOT {
+    background: #d97706;
+    border-color: #b45309;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 4px 3px;
+}
+
+.pillConfirmedOT .overtimeLabel {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .pillBlocked {
@@ -520,6 +543,39 @@
     align-items: center;
     justify-content: center;
     padding: 6px 4px;
+}
+
+/* Slots outside Square's confirmed availability — still selectable, just dimmed */
+.pillDim {
+    opacity: 0.45;
+}
+
+/* Slots where session will end after closing — yellow border + OT label */
+.pillOvertime {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 4px 3px;
+}
+
+.pillOvertime:hover:not(:disabled) {
+    background: #fef3c7;
+    border-color: #d97706;
+}
+
+.overtimeLabel {
+    font-size: 9px;
+    font-weight: 700;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 2px;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .slotTime {
@@ -762,6 +818,7 @@
 .confirmSlotBtn:active {
     transform: scale(0.98);
 }
+
 .noSlotsFooter {
     display: flex;
     flex-direction: column;
@@ -777,4 +834,48 @@
     font-size: 13px;
     color: var(--color-text-light);
     margin: 0;
+}
+
+/* ── Overtime Warning ── */
+.overtimeWarning {
+    display: flex;
+    gap: 12px;
+    background: #fff7ed;
+    border: 1.5px solid #fed7aa;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 0 0 16px;
+}
+
+.overtimeIcon {
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.overtimeTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #c2410c;
+    margin: 0 0 4px;
+}
+
+.overtimeDesc {
+    font-size: 13px;
+    color: #7c2d12;
+    margin: 0 0 6px;
+    line-height: 1.5;
+}
+
+.overtimeCharge {
+    font-size: 14px;
+    color: #111;
+    font-weight: 700;
+    margin: 0;
+}
+
+.overtimeNote {
+    font-size: 12px;
+    font-weight: 400;
+    color: #78350f;
 }

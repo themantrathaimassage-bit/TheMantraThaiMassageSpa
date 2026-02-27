@@ -124,6 +124,25 @@
     border-bottom: none;
 }
 
+/* Overtime charge row */
+.serviceRowOT {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-bottom: none;
+    border-radius: 0 6px 6px 0;
+    padding: 6px 8px;
+    margin: 2px -8px;
+}
+
+.serviceRowOT .serviceName {
+    color: #92400e;
+}
+
+.serviceRowOT .servicePrice {
+    color: #b45309;
+    font-weight: 700;
+}
+
 .serviceNameColumn {
     display: flex;
     flex-direction: column;

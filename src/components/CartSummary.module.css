@@ -326,6 +326,30 @@
     background-color: #fff5f5;
 }
 
+/* ── Overtime charge item in cart ── */
+.itemOvertime {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    margin-left: -8px;
+    padding-left: 8px;
+}
+
+.itemOvertime .itemName {
+    color: #92400e;
+    font-weight: 600;
+}
+
+.itemOvertime .itemPrice {
+    color: #b45309;
+}
+
+.overtimeLockIcon {
+    font-size: 14px;
+    opacity: 0.6;
+    cursor: default;
+}
+
 .itemPrice {
     font-weight: 700;
     color: var(--color-text);

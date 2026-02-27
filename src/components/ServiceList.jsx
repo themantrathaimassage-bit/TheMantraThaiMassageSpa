@@ -125,7 +125,10 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
 
             {/* ── Add-on Section ── */}
             {addonServices.length > 0 && addonServices.some(g => g.items.length > 0) && (() => {
-                const allAddonItems = addonServices.flatMap(g => g.items);
+                const allAddonItems = addonServices.flatMap(g => g.items)
+                    // Hide the overtime charge service — it's auto-added, not manually selectable
+                    .filter(s => !s.name?.toLowerCase().includes('over time charge'));
+                if (allAddonItems.length === 0) return null;
                 const selectedCount = allAddonItems.filter(s =>
                     s.variations?.some(v => selectedIds.includes(v.id))
                 ).length;

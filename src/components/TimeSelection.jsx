@@ -7,6 +7,42 @@ const PERIODS = [
     { key: 'evening', label: 'Evening', icon: '🌙', test: h => h >= 17 },
 ];
 
+// ── Store Hours (fixed, independent of Square config) ──────────────────────
+const STORE_OPEN_HOUR = 10;   // 10:00 AM
+const STORE_CLOSE_HOUR = 21;   // 9:00 PM
+
+// Last booking slot shown in the grid
+const LAST_BOOKING_HOUR = 20;
+const LAST_BOOKING_MIN = 30;
+const LAST_BOOKING_MINS = LAST_BOOKING_HOUR * 60 + LAST_BOOKING_MIN; // 1230
+
+// Overtime threshold — sessions ending after 21:00 incur surcharge
+const CLOSE_HOUR = 21;
+const CLOSE_TOTAL_MINS = CLOSE_HOUR * 60; // 1260
+const OVERTIME_RATE = 5;   // AUD per 15 min
+const MAX_OVERTIME_MINS = 120; // Cannot book if overtime exceeds 2 hours
+
+// Returns raw overtime MINUTES (0 if none)
+const calcOvertimeMins = (startTimeStr, durationMins) => {
+    const startMins = parseInt(startTimeStr.split(':')[0]) * 60 + parseInt(startTimeStr.split(':')[1]);
+    const endMins = startMins + durationMins;
+    return Math.max(0, endMins - CLOSE_TOTAL_MINS);
+};
+
+// Returns overtime CHARGE in AUD (rounds up to nearest 15-min block)
+const calcOvertime = (startTimeStr, durationMins) => {
+    const overMins = calcOvertimeMins(startTimeStr, durationMins);
+    if (overMins <= 0) return 0;
+    return Math.ceil(overMins / 15) * OVERTIME_RATE;
+};
+
+const formatTime12 = (timeStr) => {
+    const [h, m] = timeStr.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+};
+
 const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMembers = [] }) => {
     const LOCATION_ID = 'LY3JYWKY4FHHQ';
     const activeGuest = guests?.find(g => g.id === activeGuestId) || guests?.[0];
@@ -153,7 +189,8 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                 const year = selectedDate.year;
                 const month = String(selectedDate.date.getMonth() + 1).padStart(2, '0');
                 const day = String(selectedDate.dayNum).padStart(2, '0');
-                const startAt = `${year}-${month}-${day}T00:00:00+11:00`;
+                // Fixed store hours: 10 AM open, midnight close
+                const startAt = `${year}-${month}-${day}T${String(STORE_OPEN_HOUR).padStart(2, '0')}:00:00+11:00`;
                 const endAt = `${year}-${month}-${day}T23:59:59+11:00`;
 
                 const fetchOptions = (staffId) => {
@@ -228,14 +265,27 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
         fetchAvailability();
     }, [selectedDate, activeGuestId, guestStaffId, guestServicesKey, onlyAddons]);
 
-    // Group slots by Morning/Afternoon/Evening
+    // Fixed grid 10:00–20:30 (last booking cutoff).
+    // Square data highlights confirmed slots; no Square data = dim but selectable.
+    // Only multi-guest conflict = Busy (blocked).
     const grouped = useMemo(() => {
-        // Business Hours 10:00 - 21:00 in 15min increments
+        if (!activeGuest) return [];
+
         const allPossible = [];
-        for (let h = 10; h < 21; h++) {
+        for (let h = 10; h <= LAST_BOOKING_HOUR; h++) {
             for (let m = 0; m < 60; m += 15) {
+                const total = h * 60 + m;
+                if (total > LAST_BOOKING_MINS) break;
                 allPossible.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
             }
+        }
+
+        // Also include already-confirmed time for this guest/date
+        const confirmedTime = activeGuest?.time?.date?.id === selectedDate.id
+            ? activeGuest.time.time : null;
+        if (confirmedTime && !allPossible.includes(confirmedTime)) {
+            allPossible.push(confirmedTime);
+            allPossible.sort();
         }
 
         const now = new Date();
@@ -249,14 +299,13 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                 if (isToday && timeToMinutes(s) < currentMins + 30) return false;
                 return true;
             });
-
             return {
                 ...p,
                 slots: periodSlots,
                 availableCount: periodSlots.filter(s => availableSlots.includes(s)).length
             };
         }).filter(p => p.slots.length > 0);
-    }, [selectedDate, availableSlots]);
+    }, [selectedDate, availableSlots, activeGuest]);
 
     const handleCalendarDateSelect = (date) => {
         if (!date) return;
@@ -403,17 +452,23 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                             <div className={styles.pillGrid}>
                                 {period.slots.map(time => {
                                     const segments = availabilityMap[time] || [];
-                                    const isAvailable = segments.length > 0;
+                                    const isSquareAvailable = availableSlots.includes(time);
                                     const isConfirmed = activeGuest?.time?.time === time && activeGuest?.time?.date.id === selectedDate.id;
                                     const isBlocked = isSlotBlocked(time, segments) && !isConfirmed;
-                                    const isTaken = !isAvailable && !isConfirmed;
+                                    const overtimeMins = calcOvertimeMins(time, activeGuestDuration);
+                                    const overtime = calcOvertime(time, activeGuestDuration);
+                                    const isTooLate = overtimeMins > MAX_OVERTIME_MINS && !isConfirmed;
+                                    // Block dim slots: not in Square's availability and not already confirmed
+                                    const isUnavailable = !isSquareAvailable && !isConfirmed;
 
                                     let pillClass = styles.pill;
-                                    if (isConfirmed) pillClass += ` ${styles.pillConfirmed}`;
-                                    else if (isBlocked || isTaken) pillClass += ` ${styles.pillBlocked}`;
+                                    if (isBlocked || isTooLate || isUnavailable) pillClass += ` ${styles.pillBlocked}`;
+                                    else if (isConfirmed && overtime > 0) pillClass += ` ${styles.pillConfirmedOT}`;
+                                    else if (isConfirmed) pillClass += ` ${styles.pillConfirmed}`;
+                                    else if (overtime > 0) pillClass += ` ${styles.pillOvertime}`;
 
                                     return (
-                                        <button key={time} disabled={isBlocked || isTaken} className={pillClass} onClick={() => {
+                                        <button key={time} disabled={isBlocked || isTooLate || isUnavailable} className={pillClass} onClick={() => {
                                             const occupiedIds = guests.filter(g => g.id !== activeGuestId && g.time).filter(g => {
                                                 const gStart = timeToMinutes(g.time.time);
                                                 const gEnd = gStart + getGuestDurationMinutes(g);
@@ -430,7 +485,12 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                                             setPendingSelection({ time, date: selectedDate, availability: best });
                                         }}>
                                             <span className={styles.slotTime}>{time}</span>
-                                            {(isBlocked || isTaken) && <span className={styles.blockedLabel}>Taken</span>}
+                                            {(isBlocked || isTooLate || isUnavailable) && (
+                                                <span className={styles.blockedLabel}>{isTooLate ? 'Too Late' : isUnavailable ? 'Taken' : 'Busy'}</span>
+                                            )}
+                                            {!isBlocked && !isTooLate && !isUnavailable && overtime > 0 && (
+                                                <span className={styles.overtimeLabel}>+${overtime} OT</span>
+                                            )}
                                         </button>
                                     );
                                 })}
@@ -440,23 +500,56 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                 </div>
             )}
 
-            {/* Modal */}
-            {pendingSelection && (
-                <div className={styles.modalOverlay} onClick={() => setPendingSelection(null)}>
-                    <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.confirmHeader}><div className={styles.confirmIcon}>🕒</div><h3>Confirm your time</h3><p>For <strong>{activeGuest?.name}</strong></p></div>
-                        <div className={styles.confirmDetails}>
-                            <div className={styles.detailRow}><span className={styles.detailLabel}>Date</span><span className={styles.detailValue}>{pendingSelection.date.dayName}, {pendingSelection.date.dayNum} {pendingSelection.date.month}</span></div>
-                            <div className={styles.detailRow}><span className={styles.detailLabel}>Time</span><span className={styles.detailValue}>{pendingSelection.time}</span></div>
-                            <div className={styles.detailRow}><span className={styles.detailLabel}>Professional</span><span className={styles.detailValue}>{activeGuest.staff?.id === 'any' ? 'Any available' : activeGuest.staff?.name}</span></div>
-                        </div>
-                        <div className={styles.confirmActions}>
-                            <button className={styles.cancelLink} onClick={() => setPendingSelection(null)}>Change</button>
-                            <button className={styles.confirmSlotBtn} onClick={() => { onSelect(activeGuest.id, pendingSelection.date, pendingSelection.time, pendingSelection.availability); setPendingSelection(null); }}>Confirm & Continue</button>
+            {/* Time Confirmation Modal */}
+            {pendingSelection && (() => {
+                const otMins = calcOvertimeMins(pendingSelection.time, activeGuestDuration);
+                const overtime = calcOvertime(pendingSelection.time, activeGuestDuration);
+                const endMins = timeToMinutes(pendingSelection.time) + activeGuestDuration;
+                const endHH = String(Math.floor(endMins / 60)).padStart(2, '0');
+                const endMM = String(endMins % 60).padStart(2, '0');
+                return (
+                    <div className={styles.modalOverlay} onClick={() => setPendingSelection(null)}>
+                        <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+                            <div className={styles.confirmHeader}>
+                                <div className={styles.confirmIcon}>{overtime > 0 ? '⚠️' : '🕒'}</div>
+                                <h3>Confirm your time</h3>
+                                <p>For <strong>{activeGuest?.name}</strong></p>
+                            </div>
+                            <div className={styles.confirmDetails}>
+                                <div className={styles.detailRow}><span className={styles.detailLabel}>Date</span><span className={styles.detailValue}>{pendingSelection.date.dayName}, {pendingSelection.date.dayNum} {pendingSelection.date.month}</span></div>
+                                <div className={styles.detailRow}><span className={styles.detailLabel}>Time</span><span className={styles.detailValue}>{formatTime12(pendingSelection.time)} – {formatTime12(`${endHH}:${endMM}`)}</span></div>
+                                <div className={styles.detailRow}><span className={styles.detailLabel}>Professional</span><span className={styles.detailValue}>{activeGuest.staff?.id === 'any' ? 'Any available' : activeGuest.staff?.name}</span></div>
+                            </div>
+
+                            {overtime > 0 && (
+                                <div className={styles.overtimeWarning}>
+                                    <span className={styles.overtimeIcon}>🌙</span>
+                                    <div>
+                                        <p className={styles.overtimeTitle}>After-hours surcharge applies</p>
+                                        <p className={styles.overtimeDesc}>
+                                            Your session ends at <strong>{formatTime12(`${endHH}:${endMM}`)}</strong> — <strong>{otMins} min</strong> after our closing time (9:00 PM).
+                                        </p>
+                                        <p className={styles.overtimeCharge}>
+                                            Overtime charge: <strong>${overtime} AUD</strong>
+                                            <span className={styles.overtimeNote}> ($5 per 15 min over closing)</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className={styles.confirmActions}>
+                                <button className={styles.cancelLink} onClick={() => setPendingSelection(null)}>Change</button>
+                                <button className={styles.confirmSlotBtn} onClick={() => {
+                                    onSelect(activeGuest.id, pendingSelection.date, pendingSelection.time, pendingSelection.availability);
+                                    setPendingSelection(null);
+                                }}>
+                                    {overtime > 0 ? `Confirm (+$${overtime} overtime)` : 'Confirm & Continue'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Reorder Info Modal */}
             {popupMessage && (

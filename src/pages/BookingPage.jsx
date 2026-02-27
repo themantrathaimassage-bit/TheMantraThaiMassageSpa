@@ -9,7 +9,7 @@ import GuestSelector from '../components/GuestSelector';
 import BookingSuccessModal from '../components/BookingSuccessModal';
 import BookingErrorModal from '../components/BookingErrorModal';
 import CashOnlyModal from '../components/CashOnlyModal';
-import { fetchSquareServices, createSquareBookings } from '../data/squareCatalog';
+import { fetchSquareServices, createSquareBookings, getOvertimeVariation } from '../data/squareCatalog';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import styles from './BookingPage.module.css';
@@ -191,19 +191,41 @@ const BookingPage = () => {
     };
 
     const handleTimeSelect = React.useCallback((guestId, date, time, availability) => {
-        const staffId = guests.find(g => g.id === guestId)?.staff?.id;
-        const updatedGuests = guests.map(g => g.id === guestId ? { ...g, time: { date, time, availability, staffId } } : g);
-        setGuests(updatedGuests);
+        setGuests(prev => {
+            const guest = prev.find(g => g.id === guestId);
+            if (!guest) return prev;
 
-        const nextGuestId = getNextGuestIdForTime(updatedGuests);
-        if (nextGuestId) {
-            setActiveGuestId(nextGuestId);
-        } else {
-            setTimeout(() => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }, 100);
-        }
-    }, [guests]);
+            // Compute overtime for this guest's total bookable duration
+            const durationMs = (guest.services || []).filter(s => s.durationMs > 0)
+                .reduce((sum, s) => sum + s.durationMs, 0);
+            const durationMins = Math.ceil(durationMs / 60000);
+            const [h, m] = time.split(':').map(Number);
+            const startMins = h * 60 + m;
+            const CLOSE_MINS = 21 * 60; // 21:00
+            const endMins = startMins + durationMins;
+            const overtimeMins = Math.max(0, endMins - CLOSE_MINS);
+            const overtimeAmount = Math.ceil(overtimeMins / 15) * 5;
+            const overtimeVariation = getOvertimeVariation(overtimeAmount, overtimeMins);
+
+            // Remove any previous overtime charge from services
+            const servicesWithoutOT = (guest.services || []).filter(s => !s.isOvertime);
+            // Add new overtime service if applicable
+            const newServices = overtimeVariation
+                ? [...servicesWithoutOT, overtimeVariation]
+                : servicesWithoutOT;
+
+            const staffId = guest.staff?.id;
+            const updatedGuest = { ...guest, services: newServices, time: { date, time, availability, staffId } };
+            const updatedGuests = prev.map(g => g.id === guestId ? updatedGuest : g);
+
+            // Move to next guest needing time
+            const nextId = getNextGuestIdForTime(updatedGuests);
+            if (nextId) setActiveGuestId(nextId);
+            else setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+
+            return updatedGuests;
+        });
+    }, []);
 
     // Check if any selected service is a Cash Only promo
     const hasCashOnlyService = guests.some(g =>
@@ -327,7 +349,19 @@ const BookingPage = () => {
     const handleChangeService = (id) => { setActiveGuestId(id); setCurrentStep(1); };
 
     const handleRemoveService = (guestId, serviceId) => {
-        const updatedGuests = guests.map(g => g.id === guestId ? { ...g, services: g.services.filter(s => s.id !== serviceId), time: null } : g);
+        const updatedGuests = guests.map(g => {
+            if (g.id !== guestId) return g;
+            // Remove the target service + always strip overtime (time resets so OT is invalid)
+            const newServices = g.services.filter(s => s.id !== serviceId && !s.isOvertime);
+            const hasMain = newServices.some(s => !s.isAddon);
+            // If no main service remains, also clear staff so they start fresh
+            return {
+                ...g,
+                services: newServices,
+                time: null,
+                staff: hasMain ? g.staff : null,
+            };
+        });
         setGuests(updatedGuests);
 
         const totalServices = updatedGuests.reduce((acc, g) => acc + g.services.length, 0);
@@ -337,22 +371,15 @@ const BookingPage = () => {
             return;
         }
 
-        // Check the guest whose service was removed
         const targetGuest = updatedGuests.find(g => g.id === guestId);
         const hasMainServices = targetGuest?.services.some(s => !s.isAddon);
 
-        // If we removed the last main service for this guest (only addons or nothing left), 
-        // we MUST go back to Step 1 so they can add a main service.
         if (!hasMainServices) {
             setCurrentStep(1);
             setActiveGuestId(guestId);
         } else if (currentStep === 3) {
-            // If we are on the Time Selection step and just invalidated a guest's time,
-            // move the focus to that guest so they can re-select immediately.
             setActiveGuestId(guestId);
         }
-        // Otherwise (if they still have at least one main service), we stay on the current step.
-        // The UI will just reflect the removed item in the list.
     };
 
     const handleRemoveAll = () => {

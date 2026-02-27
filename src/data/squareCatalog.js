@@ -74,6 +74,45 @@ export async function findOrCreateSquareCustomer({ phone, firstName = '', lastNa
  * [{ category: string, items: [{ id, name, duration, durationMs, price, description, isAddon }] }]
  */
 
+// ── Overtime Charge Service (from Square catalog "over time charge") ──────────
+// Variations keyed by OVERTIME MINUTES (15 min = $5, 30 min = $10, etc.)
+const OVERTIME_ITEM_ID = 'IUV27ZFAY3H4NRC7TXNLMPUI';
+const OT_VERSION = 1772196501587;
+const OVERTIME_VARIATIONS = {
+    15: { id: '4MS5UIXPM5J7PTIEDUJPWFHY', version: OT_VERSION, price: 5 },
+    30: { id: 'HFQBUIH7RBVGF4R6UCDLUB6Y', version: OT_VERSION, price: 10 },
+    45: { id: 'YASVDMSWCNMIPXDYTXUMXMYF', version: OT_VERSION, price: 15 },
+    60: { id: 'FLU2L6LRG53FNFGNTH3NL6B5', version: OT_VERSION, price: 20 },
+    75: { id: '2W4RDPZCPMNCAP236H5BP4VW', version: OT_VERSION, price: 25 },
+    90: { id: 'AGZRQAC5J5SPU6ZMU5PEDV6H', version: OT_VERSION, price: 30 },
+    105: { id: 'VQRJJJ4ZVYT7VEG6CAR2P4NP', version: OT_VERSION, price: 35 },
+    120: { id: '5HADX7QYPN2MV2Q43V5E7MXK', version: OT_VERSION, price: 40 },
+};
+
+/**
+ * Get the overtime charge service variation for given overtime MINUTES.
+ * Rounds up to nearest 15-min bracket (max 120 min = $40).
+ */
+export function getOvertimeVariation(amount, overtimeMins = 0) {
+    if (!overtimeMins || overtimeMins <= 0) return null;
+    const bracket = Math.ceil(overtimeMins / 15) * 15;
+    const capped = Math.min(bracket, 120);
+    const variation = OVERTIME_VARIATIONS[capped];
+    if (!variation) return null;
+    return {
+        id: variation.id,
+        version: variation.version,
+        name: `Over Time Charge`,
+        baseServiceName: 'over time charge',
+        price: variation.price,
+        duration: `${overtimeMins} min over`,
+        durationMs: 0,
+        isAddon: true,
+        isOvertime: true,
+        overtimeMins: capped,
+    };
+}
+
 // Simple in-memory cache to avoid hitting Square rate limits (5 min TTL)
 let _servicesCache = null;
 let _servicesCacheTime = 0;
@@ -356,16 +395,77 @@ export async function createSquareBookings(guests, customerId) {
         const dObj = new Date(date.date);
         const startAt = `${date.year}-${pad(dObj.getMonth() + 1)}-${pad(date.dayNum)}T${pad(hours)}:${pad(minutes)}:00+11:00`;
 
-        const segments = guest.services.map(service => {
-            const availSeg = (availability?.appointment_segments || []).find(s => s.service_variation_id === service.id) || (availability?.appointment_segments || [])[0];
-            const teamMemberId = (guest.staff && guest.staff.id !== 'any') ? guest.staff.id : availSeg?.team_member_id;
+        // If no availability object (dim slot), re-fetch to find an available team member
+        let resolvedAvailability = availability;
+        if (!resolvedAvailability && (!guest.staff || guest.staff.id === 'any')) {
+            try {
+                // end = start + 1 min so Square returns that exact slot
+                const endObj = new Date(`${date.year}-${pad(dObj.getMonth() + 1)}-${pad(date.dayNum)}T${pad(hours)}:${pad(minutes)}:00+11:00`);
+                endObj.setMinutes(endObj.getMinutes() + 1);
+                const endAtStr = endObj.toISOString().replace('Z', '+11:00');
+                const res = await fetch('/api/square/v2/bookings/availability/search', {
+                    method: 'POST',
+                    headers: HEADERS,
+                    body: JSON.stringify({
+                        query: {
+                            filter: {
+                                location_id: LOCATION_ID,
+                                start_at_range: { start_at: startAt, end_at: endAtStr },
+                                segment_filters: bookableServices.map(s => ({
+                                    service_variation_id: s.id,
+                                }))
+                            }
+                        }
+                    })
+                });
+                const data = await res.json();
+                console.log('[re-fetch availability]', data);
+                if (data.availabilities?.length > 0) {
+                    resolvedAvailability = data.availabilities[0];
+                }
+            } catch (e) {
+                console.warn('Could not re-fetch availability for dim slot:', e);
+            }
+        }
+
+        const segments = bookableServices.map(service => {
+            const availSeg = (resolvedAvailability?.appointment_segments || []).find(s => s.service_variation_id === service.id)
+                || (resolvedAvailability?.appointment_segments || [])[0];
+            const teamMemberId = (guest.staff && guest.staff.id !== 'any')
+                ? guest.staff.id
+                : availSeg?.team_member_id;
 
             return {
                 service_variation_id: service.id,
                 service_variation_version: service.version,
                 duration_minutes: Math.round(service.durationMs / 60000),
-                team_member_id: teamMemberId
+                ...(teamMemberId ? { team_member_id: teamMemberId } : {})
             };
+        });
+
+        // Append overtime charge as an extra segment (uses same team member as first segment)
+        const overtimeService = guest.services.find(s => s.isOvertime);
+        if (overtimeService && overtimeService.overtimeMins > 0) {
+            const firstTeamMemberId = segments[0]?.team_member_id;
+            segments.push({
+                service_variation_id: overtimeService.id,
+                service_variation_version: overtimeService.version,
+                duration_minutes: overtimeService.overtimeMins,
+                ...(firstTeamMemberId ? { team_member_id: firstTeamMemberId } : {})
+            });
+        }
+
+        // Append zero-duration add-ons (e.g. enhancements priced separately)
+        // These won't affect slot availability but need to appear in Square's booking record
+        const zeroDurationAddons = guest.services.filter(s => s.isAddon && !s.isOvertime && s.durationMs === 0);
+        zeroDurationAddons.forEach(addon => {
+            const firstTeamMemberId = segments[0]?.team_member_id;
+            segments.push({
+                service_variation_id: addon.id,
+                ...(addon.version ? { service_variation_version: addon.version } : {}),
+                duration_minutes: 0,
+                ...(firstTeamMemberId ? { team_member_id: firstTeamMemberId } : {})
+            });
         });
 
         try {
@@ -381,11 +481,15 @@ export async function createSquareBookings(guests, customerId) {
 
             if (!resp.ok) {
                 const err = data.errors?.[0];
+                console.error('[Square booking error]', JSON.stringify(data.errors, null, 2));
                 let msg = err?.detail || 'Booking failed';
 
-                // Friendly mapping for race conditions
-                if (msg.includes('time slot is no longer available')) {
+                // Friendly mapping
+                if (msg.toLowerCase().includes('time slot is no longer available') ||
+                    msg.toLowerCase().includes('no longer available')) {
                     msg = 'Sorry, this time slot was just taken. Please select another time.';
+                } else if (msg.toLowerCase().includes('team member') && msg.toLowerCase().includes('not available')) {
+                    msg = 'The selected time is outside staff working hours. Please choose an earlier time or call us to arrange.';
                 } else if (msg.includes('only be made in the future')) {
                     msg = 'This time slot has already passed. Please select a future time.';
                 } else if (err?.category === 'AUTHENTICATION_ERROR') {

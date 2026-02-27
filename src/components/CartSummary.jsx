@@ -108,31 +108,37 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                             )}
                                         </div>
                                         <ul className={styles.list}>
-                                            {guest.services.map((item, index) => (
-                                                <li key={`${guest.id}-${item.id}-${index}`} className={styles.item}>
-                                                    <div className={styles.itemMain}>
-                                                        <div className={styles.itemInfo}>
-                                                            <span className={styles.itemName} title={item.name}>
-                                                                {formatServiceName(item.name)}
-                                                            </span>
-                                                            <div className={styles.itemMeta}>
-                                                                <span className={styles.itemDuration}>{item.duration}</span>
-                                                                <span className={styles.itemDot}>•</span>
-                                                                <span className={styles.itemPrice}>${item.price}</span>
+                                            {[...guest.services]
+                                                .sort((a, b) => (a.isAddon === b.isAddon ? 0 : a.isAddon ? 1 : -1))
+                                                .map((item, index) => (
+                                                    <li key={`${guest.id}-${item.id}-${index}`} className={`${styles.item} ${item.isOvertime ? styles.itemOvertime : ''}`}>
+                                                        <div className={styles.itemMain}>
+                                                            <div className={styles.itemInfo}>
+                                                                <span className={styles.itemName} title={item.name}>
+                                                                    {item.isOvertime ? '🌙 ' : ''}{formatServiceName(item.name)}
+                                                                </span>
+                                                                <div className={styles.itemMeta}>
+                                                                    <span className={styles.itemDuration}>{item.duration}</span>
+                                                                    <span className={styles.itemDot}>•</span>
+                                                                    <span className={styles.itemPrice}>${item.price}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className={styles.itemAction}>
+                                                                {item.isOvertime ? (
+                                                                    <span className={styles.overtimeLockIcon} title="Auto-calculated overtime charge">🔒</span>
+                                                                ) : (
+                                                                    <button
+                                                                        className={styles.removeSingleBtn}
+                                                                        onClick={() => onRemoveService(guest.id, item.id)}
+                                                                        aria-label="Remove service"
+                                                                    >
+                                                                        <FiTrash2 size={16} />
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                        <div className={styles.itemAction}>
-                                                            <button
-                                                                className={styles.removeSingleBtn}
-                                                                onClick={() => onRemoveService(guest.id, item.id)}
-                                                                aria-label="Remove service"
-                                                            >
-                                                                <FiTrash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ))}
+                                                    </li>
+                                                ))}
                                         </ul>
                                     </div>
                                 )
@@ -206,25 +212,28 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
             {/* Mobile Floating Bar */}
             {hasServices && !isReviewOpen && bookingResult !== 'success' && (
                 <div className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}>
-                    {/* Always tappable "Your Booking" area */}
-                    <div className={styles.floatingInfo} onClick={() => setIsReviewOpen(true)}>
-                        <div className={styles.floatingText}>
-                            {isDisabled && validationMsg ? (
-                                <span className={styles.validationText}>{validationMsg}</span>
-                            ) : (
-                                <span className={styles.floatingTitle}>Your Booking</span>
-                            )}
-                            <span className={styles.floatingDetails}>
-                                {itemCount} {itemCount === 1 ? 'item' : 'items'} • <strong>${totalPrice}</strong>
-                            </span>
+                    {isDisabled && validationMsg ? (
+                        <div className={styles.floatingValidation}>
+                            <span className={styles.validationText}>{validationMsg}</span>
                         </div>
-                        <FiChevronUp className={styles.floatingChevron} />
-                    </div>
+                    ) : (
+                        <div className={styles.floatingInfo} onClick={() => setIsReviewOpen(true)}>
+                            <div className={styles.floatingText}>
+                                <span className={styles.floatingTitle}>Your Booking</span>
+                                <span className={styles.floatingDetails}>
+                                    {itemCount} {itemCount === 1 ? 'item' : 'items'} • <strong>${totalPrice}</strong>
+                                </span>
+                            </div>
+                            <FiChevronUp className={styles.floatingChevron} />
+                        </div>
+                    )}
 
                     {showContinue && (
                         <button
                             className={`${styles.floatingContinueBtn} ${isDisabled ? styles.floatingDisabledBtn : ''}`}
-                            onClick={() => { if (!isDisabled) onContinue(); }}
+                            onClick={() => {
+                                if (!isDisabled) onContinue();
+                            }}
                         >
                             Continue
                         </button>
