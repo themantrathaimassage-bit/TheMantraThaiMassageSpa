@@ -838,6 +838,7 @@
     .container.overlayOpen {
         display: flex;
         animation: slideUpOverlay 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overscroll-behavior: none;
     }
 
     .overlayHeader {
@@ -950,6 +951,40 @@
         animation: floatIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     }
 
+    .floatingChevronWrapper {
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-bottom: none;
+        border-radius: 12px 12px 0 0;
+        padding: 2px 12px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 -4px 12px -2px rgba(0, 0, 0, 0.08);
+    }
+
+    .floatingChevronIcon {
+        color: #94a3b8;
+        font-size: 20px;
+        opacity: 0.8;
+    }
+
+    .floatingBarDisabled .floatingChevronWrapper {
+        background: rgba(255, 250, 250, 0.95);
+        border-color: #fda4af;
+        border-bottom: none;
+    }
+
+    .floatingBarDisabled .floatingChevronIcon {
+        color: #f43f5e;
+    }
+
     .floatingInfo {
         flex: 1;
         display: flex;
@@ -1038,10 +1073,10 @@
         right: 0;
         bottom: 0;
         background-color: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
         z-index: 1050;
         animation: fadeIn 0.3s ease;
+        touch-action: none;
+        overscroll-behavior: none;
     }
 }
 

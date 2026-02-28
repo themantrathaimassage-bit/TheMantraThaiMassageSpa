@@ -716,8 +716,7 @@
 }
 
 .confirmModal {
-    background: rgba(255, 253, 250, 0.65);
-    backdrop-filter: blur(12px);
+    background: var(--color-surface);
     width: calc(100% - 32px);
     max-width: 440px;
     border-radius: 24px;

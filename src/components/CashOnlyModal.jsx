@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX, FiAlertTriangle, FiCheckSquare, FiSquare } from 'react-icons/fi';
 import styles from './CashOnlyModal.module.css';
 
 const CashOnlyModal = ({ onConfirm, onCancel }) => {
     const [checked, setChecked] = useState(false);
+
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
 
     return (
         <div className={styles.backdrop} onClick={onCancel}>

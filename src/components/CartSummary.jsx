@@ -11,11 +11,51 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const activeGuest = guests.find(g => g.id === activeGuestId);
 
     // Listen for booking success to close the mobile overlay
+    // Listen for booking success to close the mobile overlay
     useEffect(() => {
         const handleClose = () => setIsReviewOpen(false);
         window.addEventListener('closeMobileOverlay', handleClose);
         return () => window.removeEventListener('closeMobileOverlay', handleClose);
     }, []);
+
+    // Swipe down to close state for the overlay only
+    const [dragY, setDragY] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartY = React.useRef(null);
+
+    const handleOverlayTouchStart = (e) => {
+        dragStartY.current = e.touches[0].clientY;
+        setIsDragging(true);
+    };
+
+    const handleOverlayTouchMove = (e) => {
+        if (!isDragging) return;
+        const currentY = e.touches[0].clientY;
+        const delta = currentY - dragStartY.current;
+        if (delta > 0) { // Only allow dragging downwards
+            setDragY(delta);
+        }
+    };
+
+    const handleOverlayTouchEnd = () => {
+        setIsDragging(false);
+        if (dragY > 100) {
+            setIsReviewOpen(false);
+        }
+        setDragY(0);
+    };
+
+    // Prevent background scrolling when mobile overlay is open
+    useEffect(() => {
+        if (isReviewOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isReviewOpen]);
 
     // Helper to clean up service names that include duration in parentheses
     const formatServiceName = (name) => {
@@ -52,11 +92,25 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
 
     const itemCount = guests.reduce((acc, g) => acc + g.services.length, 0);
 
+    const overlayStyle = {
+        transform: isDragging && isReviewOpen ? `translateY(${dragY}px)` : '',
+        transition: isDragging ? 'none' : ''
+    };
+
     return (
         <>
             {/* Desktop & Mobile Overlay Container */}
-            <div className={`${styles.container} ${isReviewOpen ? styles.overlayOpen : ''}`}>
-                <div className={styles.overlayHeader} onClick={() => setIsReviewOpen(false)}>
+            <div
+                className={`${styles.container} ${isReviewOpen ? styles.overlayOpen : ''}`}
+                style={overlayStyle}
+            >
+                <div
+                    className={styles.overlayHeader}
+                    onClick={() => setIsReviewOpen(false)}
+                    onTouchStart={handleOverlayTouchStart}
+                    onTouchMove={handleOverlayTouchMove}
+                    onTouchEnd={handleOverlayTouchEnd}
+                >
                     <span className={styles.overlayTitle}>Review your booking</span>
                     <button className={styles.closeOverlayBtn}>
                         <FiX size={20} />
@@ -250,27 +304,33 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
 
             {/* Mobile Floating Bar */}
             {hasServices && !isReviewOpen && bookingResult !== 'success' && (
-                <div className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}>
+                <div
+                    className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}
+                    onClick={() => setIsReviewOpen(true)}
+                >
+                    <div className={styles.floatingChevronWrapper}>
+                        <FiChevronUp className={styles.floatingChevronIcon} />
+                    </div>
                     {isDisabled && validationMsg ? (
                         <div className={styles.floatingValidation}>
                             <span className={styles.validationText}>{validationMsg}</span>
                         </div>
                     ) : (
-                        <div className={styles.floatingInfo} onClick={() => setIsReviewOpen(true)}>
+                        <div className={styles.floatingInfo}>
                             <div className={styles.floatingText}>
                                 <span className={styles.floatingTitle}>Your Booking</span>
                                 <span className={styles.floatingDetails}>
                                     {itemCount} {itemCount === 1 ? 'item' : 'items'} • <strong>${totalPrice}</strong>
                                 </span>
                             </div>
-                            <FiChevronUp className={styles.floatingChevron} />
                         </div>
                     )}
 
                     {showContinue && (
                         <button
                             className={`${styles.floatingContinueBtn} ${isDisabled ? styles.floatingDisabledBtn : ''}`}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 if (!isDisabled) onContinue();
                             }}
                         >
@@ -280,7 +340,10 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                     {allHaveTime && (
                         <button
                             className={styles.floatingBookBtn}
-                            onClick={onBook}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onBook();
+                            }}
                             disabled={isBooking}
                         >
                             {isBooking ? '...' : 'Book'}

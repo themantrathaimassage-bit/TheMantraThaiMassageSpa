@@ -18,7 +18,7 @@
 }
 
 .modal {
-    background: rgba(255, 253, 250, 0.65);
+    background: var(--color-surface);
     backdrop-filter: blur(12px);
     border-radius: 24px 24px 0 0;
     width: 100%;
@@ -187,7 +187,7 @@
     font-size: 14px;
     font-weight: 600;
     color: #374151;
-    background: rgba(255, 253, 250, 0.65);
+    background: var(--color-surface);
     backdrop-filter: blur(12px);
     cursor: pointer;
     transition: background 0.15s;

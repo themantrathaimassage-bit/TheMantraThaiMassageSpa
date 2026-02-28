@@ -172,6 +172,18 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
     const guestServicesKey = JSON.stringify(bookableServices.map(s => s.id));
     const guestStaffId = activeGuest?.staff?.id;
 
+    // Lock body scroll when confirmation modal is open
+    React.useEffect(() => {
+        if (pendingSelection) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [pendingSelection]);
+
     // Fetch Availability
     React.useEffect(() => {
         const fetchAvailability = async () => {

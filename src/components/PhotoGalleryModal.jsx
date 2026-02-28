@@ -16,13 +16,18 @@ const PhotoGalleryModal = ({ images, onClose, initialIndex = 0 }) => {
     };
 
     React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') onClose();
             if (e.key === 'ArrowLeft') handlePrev(e);
             if (e.key === 'ArrowRight') handleNext(e);
         };
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'unset';
+        };
     }, [onClose]);
 
     return (

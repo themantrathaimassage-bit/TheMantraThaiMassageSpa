@@ -21,7 +21,7 @@
 }
 
 .content {
-    background: rgba(255, 253, 250, 0.65);
+    background: var(--color-surface);
     backdrop-filter: blur(12px);
     width: 100%;
     max-width: 500px;
