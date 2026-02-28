@@ -239,39 +239,61 @@
 }
 
 .list {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    /* Reduced gap between items */
+    gap: 1px;
+    /* Practically touching */
 }
 
 .item {
     background: rgba(255, 253, 250, 0.65);
     backdrop-filter: blur(12px);
     border: 1px solid #f1f5f9;
-    padding: 8px 10px;
-    /* Reduced padding from 10px 12px */
-    border-radius: 8px;
-    /* Sharper corners for minimal look */
+    padding: 6px 8px;
+    /* Ultra-compact padding */
+    border-radius: 6px;
+    /* Small radius for tight stacking */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     transition: all 0.2s;
     position: relative;
     /* ensure proper stacking when pulled up */
 }
 
-/* Pull add-on items closer to the main service above them */
-.itemAddon {
-    margin-top: -6px;
-    /* Pull tighter */
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    background: rgba(250, 250, 250, 0.85);
-    border-top: none;
-    /* Remove duplicate border line if any */
+/* ── Separated Add-ons Section ── */
+.servicesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* Very tight gap between main services and add-ons */
+}
+
+.addonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    /* Add-ons almost touching */
+    margin-top: 0px;
+    /* Snug against main services */
+}
+
+.addonGroupLabel {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: #94a3b8;
+    padding-left: 4px;
+    margin-bottom: 2px;
+}
+
+/* Base style for Add-ons now that they are separated */
+.itemAddonSeparated {
+    background: rgba(250, 250, 250, 0.4);
+    border: 1px dashed #e2e8f0;
 }
 
 .item:hover {

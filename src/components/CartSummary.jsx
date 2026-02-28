@@ -107,18 +107,17 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                                 </button>
                                             )}
                                         </div>
-                                        <ul className={styles.list}>
-                                            {[...guest.services]
-                                                .sort((a, b) => (a.isAddon === b.isAddon ? 0 : a.isAddon ? 1 : -1))
-                                                .map((item, index) => (
+                                        <div className={styles.servicesContainer}>
+                                            <ul className={styles.list}>
+                                                {guest.services.filter(s => !s.isAddon).map((item, index) => (
                                                     <li
-                                                        key={`${guest.id}-${item.id}-${index}`}
-                                                        className={`${styles.item} ${item.isOvertime ? styles.itemOvertime : ''} ${item.isAddon && !item.isOvertime ? styles.itemAddon : ''}`}
+                                                        key={`${guest.id}-main-${item.id}-${index}`}
+                                                        className={styles.item}
                                                     >
                                                         <div className={styles.itemMain}>
                                                             <div className={styles.itemInfo}>
                                                                 <span className={styles.itemName} title={item.name}>
-                                                                    {item.isOvertime ? '🌙 ' : ''}{formatServiceName(item.name)}
+                                                                    {formatServiceName(item.name)}
                                                                 </span>
                                                                 <div className={styles.itemMeta}>
                                                                     <span className={styles.itemDuration}>{item.duration}</span>
@@ -127,22 +126,59 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                                                 </div>
                                                             </div>
                                                             <div className={styles.itemAction}>
-                                                                {item.isOvertime ? (
-                                                                    <span className={styles.overtimeLockIcon} title="Auto-calculated overtime charge">🔒</span>
-                                                                ) : (
-                                                                    <button
-                                                                        className={styles.removeSingleBtn}
-                                                                        onClick={() => onRemoveService(guest.id, item.id)}
-                                                                        aria-label="Remove service"
-                                                                    >
-                                                                        <FiTrash2 size={16} />
-                                                                    </button>
-                                                                )}
+                                                                <button
+                                                                    className={styles.removeSingleBtn}
+                                                                    onClick={() => onRemoveService(guest.id, item.id)}
+                                                                    aria-label="Remove service"
+                                                                >
+                                                                    <FiTrash2 size={16} />
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </li>
                                                 ))}
-                                        </ul>
+                                            </ul>
+
+                                            {guest.services.some(s => s.isAddon) && (
+                                                <div className={styles.addonGroup}>
+                                                    <div className={styles.addonGroupLabel}>{guest.name} Add-ons</div>
+                                                    <ul className={styles.list}>
+                                                        {guest.services.filter(s => s.isAddon).map((item, index) => (
+                                                            <li
+                                                                key={`${guest.id}-addon-${item.id}-${index}`}
+                                                                className={`${styles.item} ${item.isOvertime ? styles.itemOvertime : styles.itemAddonSeparated}`}
+                                                            >
+                                                                <div className={styles.itemMain}>
+                                                                    <div className={styles.itemInfo}>
+                                                                        <span className={styles.itemName} title={item.name}>
+                                                                            {item.isOvertime ? '🌙 ' : ''}{formatServiceName(item.name)}
+                                                                        </span>
+                                                                        <div className={styles.itemMeta}>
+                                                                            <span className={styles.itemDuration}>{item.duration}</span>
+                                                                            <span className={styles.itemDot}>•</span>
+                                                                            <span className={styles.itemPrice}>${item.price}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className={styles.itemAction}>
+                                                                        {item.isOvertime ? (
+                                                                            <span className={styles.overtimeLockIcon} title="Auto-calculated overtime charge">🔒</span>
+                                                                        ) : (
+                                                                            <button
+                                                                                className={styles.removeSingleBtn}
+                                                                                onClick={() => onRemoveService(guest.id, item.id)}
+                                                                                aria-label="Remove service"
+                                                                            >
+                                                                                <FiTrash2 size={16} />
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )
                             ))}
