@@ -16,7 +16,8 @@
 }
 
 .modal {
-    background-color: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     width: 100%;
     max-width: 400px;
     border-radius: 24px;
@@ -28,7 +29,7 @@
 .header {
     padding: 24px 20px 16px;
     text-align: center;
-    background: linear-gradient(to bottom, #f0fdf4 0%, #ffffff 100%);
+    background: linear-gradient(to bottom, #f0fdf4 0%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 .successIconWrapper {
@@ -50,7 +51,7 @@
 .title {
     font-size: 18px;
     font-weight: 800;
-    color: #111;
+    color: var(--color-text);
     margin: 0 0 4px;
     letter-spacing: -0.02em;
 }
@@ -102,7 +103,7 @@
 .staffBadge {
     margin-left: auto;
     font-size: 10px;
-    background-color: #f1f5f9;
+    background-color: var(--color-surface);
     color: #475569;
     padding: 2px 8px;
     border-radius: 100px;
@@ -152,7 +153,7 @@
 .serviceName {
     font-size: 14px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--color-text);
 }
 
 .serviceSub {
@@ -164,7 +165,7 @@
 .servicePrice {
     font-size: 14px;
     font-weight: 700;
-    color: #111;
+    color: var(--color-text);
 }
 
 .dateTimeLine {
@@ -203,7 +204,7 @@
 .totalValue {
     font-size: 20px;
     font-weight: 800;
-    color: #111;
+    color: var(--color-text);
 }
 
 .footer {
@@ -216,7 +217,7 @@
 
 .homeBtn {
     width: 100%;
-    background-color: #111;
+    background-color: var(--color-text);
     color: white;
     padding: 14px;
     border-radius: 12px;
@@ -232,7 +233,7 @@
 }
 
 .homeBtn:hover {
-    background-color: #333;
+    background-color: var(--color-text-light);
     transform: translateY(-2px);
 }
 

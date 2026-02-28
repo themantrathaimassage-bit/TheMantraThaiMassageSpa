@@ -3,7 +3,8 @@
     position: sticky;
     top: 56px;
     z-index: 70;
-    background-color: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     margin: -12px -16px 8px;
     padding: 8px 16px 8px;
     border-bottom: 1px solid var(--color-border);
@@ -34,7 +35,8 @@
     padding: 6px 10px;
     border: 1.5px solid var(--color-border);
     border-radius: 8px;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     cursor: pointer;
     transition: all 0.15s;
     min-width: 90px;
@@ -124,7 +126,8 @@
     top: 106px;
     /* Adjusted tops */
     z-index: 65;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     margin: 0 -16px;
     padding: 2px 16px 0;
     display: flex;
@@ -179,7 +182,8 @@
 
 /* ── Full calendar ── */
 .fullCalendar {
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 12px;
@@ -269,7 +273,8 @@
     position: sticky;
     top: 134px;
     z-index: 50;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     margin: 0 -16px 0;
     padding: 0 16px 4px;
     border-bottom: 1px solid var(--color-border);
@@ -309,7 +314,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     cursor: pointer;
     transition: all 0.15s;
     flex-shrink: 0;
@@ -476,7 +482,8 @@
     padding: 8px 4px;
     border: 1.5px solid var(--color-border);
     border-radius: 8px;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     font-size: 13px;
     font-weight: 500;
     color: var(--color-text);
@@ -596,7 +603,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border-top: 1px solid var(--color-border);
     padding: 12px 20px;
     display: flex;
@@ -708,7 +716,8 @@
 }
 
 .confirmModal {
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     width: calc(100% - 32px);
     max-width: 440px;
     border-radius: 24px;
@@ -759,7 +768,7 @@
 }
 
 .confirmDetails {
-    background: #f8fafc;
+    background: var(--color-surface);
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 24px;
@@ -869,7 +878,7 @@
 
 .overtimeCharge {
     font-size: 14px;
-    color: #111;
+    color: var(--color-text);
     font-weight: 700;
     margin: 0;
 }

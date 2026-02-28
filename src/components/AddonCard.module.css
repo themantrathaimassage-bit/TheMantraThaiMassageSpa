@@ -37,7 +37,7 @@
 }
 
 .iconSelected {
-    background: #111;
+    background: var(--color-text);
 }
 
 /* Name + price */
@@ -52,7 +52,7 @@
 .name {
     font-size: 14px;
     font-weight: 600;
-    color: #111;
+    color: var(--color-text);
     line-height: 1.3;
     text-align: left;
 }
@@ -74,7 +74,7 @@
 }
 
 .toggleOn {
-    background: #111;
+    background: var(--color-text);
 }
 
 .knob {
@@ -84,7 +84,8 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #fff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;

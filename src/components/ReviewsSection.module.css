@@ -42,7 +42,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #ffffff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border: 1px solid #e0e0e0;
     padding: 8px 12px;
     border-radius: 12px;
@@ -116,7 +117,8 @@
 .seeAllCard {
     min-width: 160px;
     max-width: 160px;
-    background: #ffffff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 16px;
     border: 1px solid #f0f0f0;
@@ -138,7 +140,7 @@
 
 .seeAllCard:hover .seeAllIconWrapper {
     background: var(--color-text);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .seeAllIconWrapper {
@@ -163,7 +165,8 @@
 .reviewCard {
     min-width: 280px;
     max-width: 280px;
-    background: #ffffff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 16px;
     border: 1px solid #f0f0f0;
@@ -205,12 +208,12 @@
 
 .avatarBg1 {
     background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
-    color: #333;
+    color: var(--color-text-light);
 }
 
 .avatarBg2 {
     background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-    color: #333;
+    color: var(--color-text-light);
 }
 
 .avatarBg3 {
@@ -219,7 +222,7 @@
 
 .avatarBg4 {
     background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-    color: #333;
+    color: var(--color-text-light);
 }
 
 .userInfo {
@@ -301,7 +304,7 @@
     align-items: center;
     gap: 10px;
     background: var(--color-text);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.6);
     border: none;
     padding: 12px 28px;
     border-radius: 100px;
@@ -313,7 +316,7 @@
 }
 
 .writeReviewBrandBtn:hover {
-    background: #000000;
+    background: var(--color-text);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
@@ -397,7 +400,8 @@
 }
 
 .modalContent {
-    background: #ffffff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border-radius: 24px;
     width: 100%;
     max-width: 680px;
@@ -428,7 +432,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #ffffff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     z-index: 2;
 }
 
@@ -515,7 +520,7 @@
 
 .primaryButtonBlock {
     background-color: var(--color-text);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.6);
     border: none;
     padding: 14px 20px;
     border-radius: 16px;
@@ -533,7 +538,7 @@
 }
 
 .primaryButtonBlock:hover {
-    background-color: #000000;
+    background-color: var(--color-text);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }

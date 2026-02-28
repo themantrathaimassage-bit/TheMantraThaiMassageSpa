@@ -111,7 +111,10 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                                             {[...guest.services]
                                                 .sort((a, b) => (a.isAddon === b.isAddon ? 0 : a.isAddon ? 1 : -1))
                                                 .map((item, index) => (
-                                                    <li key={`${guest.id}-${item.id}-${index}`} className={`${styles.item} ${item.isOvertime ? styles.itemOvertime : ''}`}>
+                                                    <li
+                                                        key={`${guest.id}-${item.id}-${index}`}
+                                                        className={`${styles.item} ${item.isOvertime ? styles.itemOvertime : ''} ${item.isAddon && !item.isOvertime ? styles.itemAddon : ''}`}
+                                                    >
                                                         <div className={styles.itemMain}>
                                                             <div className={styles.itemInfo}>
                                                                 <span className={styles.itemName} title={item.name}>

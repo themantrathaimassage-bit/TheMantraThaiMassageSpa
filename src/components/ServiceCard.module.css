@@ -1,5 +1,6 @@
 .card {
-    background-color: #fff;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid #f0f0f0;
     padding: 16px 0;
     margin-bottom: 0;
@@ -25,7 +26,7 @@
     }
 
     .card:hover {
-        border-color: #000;
+        border-color: var(--color-text);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
@@ -50,7 +51,7 @@
 .serviceName {
     font-size: 17px;
     font-weight: 600;
-    color: #111;
+    color: var(--color-text);
     margin: 0;
     line-height: 1.4;
     flex: 1;
@@ -59,7 +60,7 @@
 .priceTag {
     font-size: 17px;
     font-weight: 700;
-    color: #000;
+    color: var(--color-text);
     white-space: nowrap;
 }
 
@@ -75,7 +76,7 @@
 
 .description {
     font-size: 14px;
-    color: #666;
+    color: var(--color-text-light);
     line-height: 1.5;
     margin: 0;
     white-space: nowrap;
@@ -95,7 +96,7 @@
 }
 
 .descriptionWrapper:hover .description {
-    color: #000;
+    color: var(--color-text);
 }
 
 .descriptionWrapper:hover .moreLink {
@@ -141,8 +142,8 @@
 }
 
 .pillActive {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--color-text);
+    color: rgba(255, 255, 255, 0.6);
     font-weight: 600;
 }
 
@@ -153,8 +154,8 @@
 }
 
 .addButton {
-    background-color: #000;
-    color: #fff;
+    background-color: var(--color-text);
+    color: rgba(255, 255, 255, 0.6);
     border: none;
     border-radius: 8px;
     padding: 8px 24px;
@@ -172,7 +173,7 @@
 
 @media (hover: hover) {
     .addButton:hover {
-        background-color: #333;
+        background-color: var(--color-text-light);
     }
 }
 

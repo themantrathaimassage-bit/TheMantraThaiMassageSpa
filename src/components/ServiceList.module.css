@@ -6,7 +6,8 @@
     position: sticky;
     top: 93px;
     /* 56 (Header) + ~37 (Slim GuestSelector) */
-    background-color: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     z-index: 55;
     margin: 0 -12px 16px;
     padding: 0 12px;
@@ -44,7 +45,7 @@
     padding: 4px 2px 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #666;
+    color: var(--color-text-light);
     cursor: pointer;
     position: relative;
     transition: color 0.2s, font-weight 0.2s;
@@ -52,11 +53,11 @@
 }
 
 .categoryTab:hover {
-    color: #333;
+    color: var(--color-text-light);
 }
 
 .tabActive {
-    color: #000;
+    color: var(--color-text);
     font-weight: 700;
 }
 
@@ -67,7 +68,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background-color: #000;
+    background-color: var(--color-text);
     border-radius: 2px;
 }
 
@@ -107,18 +108,19 @@
     margin-top: 8px;
     padding: 14px;
     text-align: center;
-    background-color: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     color: var(--color-text);
     font-size: 14px;
     font-weight: 600;
-    border: 1.5px solid #222;
+    border: 1.5px solid var(--color-text);
     border-radius: 8px;
     text-decoration: none;
     transition: background-color 0.2s, color 0.2s;
 }
 
 .seeAllBtn:hover {
-    background-color: #222;
+    background-color: var(--color-text);
     color: white;
 }
 
@@ -145,7 +147,8 @@
 }
 
 .skeletonCard {
-    background-color: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     border: 1px solid #f0f0f0;
     border-radius: 16px;
     padding: 24px;
@@ -208,10 +211,10 @@
 
 /* ── Add-on Section ── */
 .addonSection {
-    margin-top: 4px;
+    margin-top: -8px;
     margin-bottom: 16px;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    padding-top: 8px;
+    /* Removed top border to make it feel more attached to the services above */
 }
 
 .addonHeader {
@@ -222,7 +225,7 @@
     width: 100%;
     background: none;
     border: none;
-    padding: 4px 0 10px;
+    padding: 0 0 10px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
@@ -241,8 +244,8 @@
 .addonBadge {
     font-size: 11px;
     font-weight: 700;
-    background: #111;
-    color: #fff;
+    background: var(--color-text);
+    color: rgba(255, 255, 255, 0.6);
     padding: 2px 8px;
     border-radius: 20px;
     letter-spacing: 0;

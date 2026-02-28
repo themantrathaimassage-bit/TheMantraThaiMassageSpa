@@ -16,7 +16,7 @@
 }
 
 .modal {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--color-surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -55,7 +55,7 @@
     position: absolute;
     top: 24px;
     right: 24px;
-    background: #f1f5f9;
+    background: var(--color-surface);
     border: none;
     width: 36px;
     height: 36px;
@@ -144,7 +144,8 @@
     padding: 12px;
     border: 1.5px solid #e2e8f0;
     border-radius: 12px;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     font-size: 14px;
     color: #0f172a;
     cursor: pointer;
@@ -159,7 +160,8 @@
     border-radius: 12px;
     font-size: 16px;
     color: #0f172a;
-    background: white;
+    background: rgba(255, 253, 250, 0.65);
+    backdrop-filter: blur(12px);
     outline: none;
     width: 100%;
     /* Remove all transitions while the modal is moving to keep the caret stable */
