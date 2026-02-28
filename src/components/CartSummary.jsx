@@ -22,6 +22,8 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const [dragY, setDragY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const dragStartY = React.useRef(null);
+    const overlayRef = React.useRef(null);
+    const animationRef = React.useRef(null);
 
     const handleOverlayTouchStart = (e) => {
         dragStartY.current = e.touches[0].clientY;
@@ -32,17 +34,38 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         if (!isDragging) return;
         const currentY = e.touches[0].clientY;
         const delta = currentY - dragStartY.current;
+
         if (delta > 0) { // Only allow dragging downwards
-            setDragY(delta);
+            // Use requestAnimationFrame for smooth 60fps dragging without React state lag
+            if (animationRef.current) cancelAnimationFrame(animationRef.current);
+            animationRef.current = requestAnimationFrame(() => {
+                if (overlayRef.current) {
+                    overlayRef.current.style.transform = `translateY(${delta}px)`;
+                    overlayRef.current.style.transition = 'none';
+                }
+            });
+            // Still track it in ref for the end calculation, but don't cause re-renders during drag
+            dragStartY.lastDelta = delta;
         }
     };
 
     const handleOverlayTouchEnd = () => {
         setIsDragging(false);
-        if (dragY > 100) {
+        const finalDelta = dragStartY.lastDelta || 0;
+
+        if (finalDelta > 100) {
             setIsReviewOpen(false);
+        } else {
+            // Snap back
+            if (overlayRef.current) {
+                overlayRef.current.style.transform = '';
+                overlayRef.current.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            }
         }
+
+        dragStartY.lastDelta = 0;
         setDragY(0);
+        if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
 
     // Prevent background scrolling when mobile overlay is open
@@ -93,14 +116,17 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const itemCount = guests.reduce((acc, g) => acc + g.services.length, 0);
 
     const overlayStyle = {
-        transform: isDragging && isReviewOpen ? `translateY(${dragY}px)` : '',
-        transition: isDragging ? 'none' : ''
+        // Only apply React state transforms when not actively dragging to avoid lag
+        transform: (!isDragging && isReviewOpen) ? '' : undefined,
+        transition: !isDragging ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+        touchAction: 'pan-y' // Prevent browser pull-to-refresh interfering ideally
     };
 
     return (
         <>
             {/* Desktop & Mobile Overlay Container */}
             <div
+                ref={overlayRef}
                 className={`${styles.container} ${isReviewOpen ? styles.overlayOpen : ''}`}
                 style={overlayStyle}
             >
