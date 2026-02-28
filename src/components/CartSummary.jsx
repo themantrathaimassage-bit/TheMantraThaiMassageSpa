@@ -53,7 +53,8 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         setIsDragging(false);
         const finalDelta = dragStartY.lastDelta || 0;
 
-        if (finalDelta > 100) {
+        // Requires a really deep, deliberate swipe down (~350px) to close the modal
+        if (finalDelta > 350) {
             setIsReviewOpen(false);
         } else {
             // Snap back
@@ -132,13 +133,12 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
             >
                 <div
                     className={styles.overlayHeader}
-                    onClick={() => setIsReviewOpen(false)}
                     onTouchStart={handleOverlayTouchStart}
                     onTouchMove={handleOverlayTouchMove}
                     onTouchEnd={handleOverlayTouchEnd}
                 >
                     <span className={styles.overlayTitle}>Review your booking</span>
-                    <button className={styles.closeOverlayBtn}>
+                    <button className={styles.closeOverlayBtn} onClick={() => setIsReviewOpen(false)}>
                         <FiX size={20} />
                     </button>
                 </div>
