@@ -140,7 +140,7 @@
 
 .seeAllCard:hover .seeAllIconWrapper {
     background: var(--color-text);
-    color: rgba(255, 255, 255, 0.6);
+    color: #fff;
 }
 
 .seeAllIconWrapper {
@@ -304,7 +304,7 @@
     align-items: center;
     gap: 10px;
     background: var(--color-text);
-    color: rgba(255, 255, 255, 0.6);
+    color: #fff;
     border: none;
     padding: 12px 28px;
     border-radius: 100px;
@@ -520,7 +520,7 @@
 
 .primaryButtonBlock {
     background-color: var(--color-text);
-    color: rgba(255, 255, 255, 0.6);
+    color: #fff;
     border: none;
     padding: 14px 20px;
     border-radius: 16px;

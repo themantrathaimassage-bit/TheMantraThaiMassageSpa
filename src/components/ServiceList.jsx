@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FiChevronDown } from 'react-icons/fi';
 import ServiceCard from './ServiceCard';
@@ -17,12 +17,26 @@ const isAddonGroup = (group) => {
 };
 
 const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoading, buttonText, selectedIds = [] }) => {
-    const mainServices = services.filter(g => !isAddonGroup(g));
-    const addonServices = services.filter(g => isAddonGroup(g));
+    const mainServices = useMemo(() => services.filter(g => !isAddonGroup(g)), [services]);
+    const addonServices = useMemo(() => services.filter(g => isAddonGroup(g)), [services]);
 
     // Check if any selected item is a main (non-addon) service
-    const allItems = services.flatMap(g => g.items || []);
-    const hasMainService = allItems.some(s => !s.isAddon && s.variations?.some(v => selectedIds.includes(v.id)));
+    const hasMainService = useMemo(() => {
+        const allItems = services.flatMap(g => g.items || []);
+        return allItems.some(s => !s.isAddon && s.variations?.some(v => selectedIds.includes(v.id)));
+    }, [services, selectedIds]);
+
+    const { allAddonItems, addonSelectedCount } = useMemo(() => {
+        if (!addonServices || !addonServices.some(g => g.items.length > 0)) {
+            return { allAddonItems: [], addonSelectedCount: 0 };
+        }
+        const items = addonServices.flatMap(g => g.items)
+            .filter(s => !s.name?.toLowerCase().includes('over time charge'));
+        const count = items.filter(s =>
+            s.variations?.some(v => selectedIds.includes(v.id))
+        ).length;
+        return { allAddonItems: items, addonSelectedCount: count };
+    }, [addonServices, selectedIds]);
 
     const [activeCategory, setActiveCategory] = useState(mainServices?.[0]?.category);
     const [addonOpen, setAddonOpen] = useState(() => window.innerWidth > 768);
@@ -54,9 +68,11 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
     };
 
     // If searching, show all main categories. Otherwise, filter by active tab.
-    const displayServices = isSearching
+    const displayServices = useMemo(() => isSearching
         ? mainServices
-        : mainServices.filter(group => group.category === activeCategory);
+        : mainServices.filter(group => group.category === activeCategory),
+        [isSearching, mainServices, activeCategory]
+    );
 
     // Loading skeleton
     if (isLoading) {
@@ -124,44 +140,36 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
             </div>
 
             {/* ── Add-on Section ── */}
-            {addonServices.length > 0 && addonServices.some(g => g.items.length > 0) && (() => {
-                const allAddonItems = addonServices.flatMap(g => g.items)
-                    // Hide the overtime charge service — it's auto-added, not manually selectable
-                    .filter(s => !s.name?.toLowerCase().includes('over time charge'));
-                if (allAddonItems.length === 0) return null;
-                const selectedCount = allAddonItems.filter(s =>
-                    s.variations?.some(v => selectedIds.includes(v.id))
-                ).length;
-                return (
-                    <div className={styles.addonSection}>
-                        <button
-                            className={styles.addonHeader}
-                            onClick={() => setAddonOpen(p => !p)}
-                        >
-                            <span className={styles.addonTitle}>
-                                Add-ons
-                                {!addonOpen && selectedCount > 0 && (
-                                    <span className={styles.addonBadge}>{selectedCount} selected</span>
-                                )}
-                            </span>
-                            <FiChevronDown
-                                size={16}
-                                className={`${styles.addonChevron} ${addonOpen ? styles.addonChevronOpen : ''}`}
+            {/* ── Add-on Section ── */}
+            {allAddonItems.length > 0 && (
+                <div className={styles.addonSection}>
+                    <button
+                        className={styles.addonHeader}
+                        onClick={() => setAddonOpen(p => !p)}
+                    >
+                        <span className={styles.addonTitle}>
+                            Add-ons
+                            {!addonOpen && addonSelectedCount > 0 && (
+                                <span className={styles.addonBadge}>{addonSelectedCount} selected</span>
+                            )}
+                        </span>
+                        <FiChevronDown
+                            size={16}
+                            className={`${styles.addonChevron} ${addonOpen ? styles.addonChevronOpen : ''}`}
+                        />
+                    </button>
+                    <div className={`${styles.addonGrid} ${addonOpen ? styles.addonGridOpen : styles.addonGridClosed}`}>
+                        {allAddonItems.map((service) => (
+                            <AddonCard
+                                key={service.name}
+                                service={service}
+                                onSelect={onServiceSelect}
+                                selectedIds={selectedIds}
                             />
-                        </button>
-                        <div className={`${styles.addonGrid} ${addonOpen ? styles.addonGridOpen : styles.addonGridClosed}`}>
-                            {allAddonItems.map((service) => (
-                                <AddonCard
-                                    key={service.name}
-                                    service={service}
-                                    onSelect={onServiceSelect}
-                                    selectedIds={selectedIds}
-                                />
-                            ))}
-                        </div>
+                        ))}
                     </div>
-                );
-            })()}
+                </div>
+            )}
 
             {!hideSeeAll && (
                 <Link to="/booking" className={styles.seeAllBtn}>

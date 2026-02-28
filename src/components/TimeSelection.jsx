@@ -135,23 +135,28 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
 
     const activeGuestDuration = useMemo(() => getGuestDurationMinutes(activeGuest), [activeGuest]);
 
-    const isSlotBlocked = (timeStr, segments = []) => {
+    const otherGuestsTimes = useMemo(() => {
+        return guests
+            .filter(g => g.id !== activeGuestId && g.time)
+            .map(g => {
+                const start = timeToMinutes(g.time.time);
+                const end = start + getGuestDurationMinutes(g);
+                const staffIds = g.time.availability?.appointment_segments?.map(s => s.team_member_id) || [];
+                if (staffIds.length === 0 && g.staff?.id && g.staff.id !== 'any') {
+                    staffIds.push(g.staff.id);
+                }
+                return { start, end, staffIds };
+            });
+    }, [guests, activeGuestId]);
+
+    const isSlotBlocked = React.useCallback((timeStr, segments = []) => {
         const start = timeToMinutes(timeStr);
         const end = start + activeGuestDuration;
 
         // 1. Find who is already occupied by the group during this window
-        const occupiedStaffIds = guests
-            .filter(g => g.id !== activeGuestId && g.time)
-            .filter(g => {
-                const gStart = timeToMinutes(g.time.time);
-                const gEnd = gStart + getGuestDurationMinutes(g);
-                return start < gEnd && end > gStart;
-            })
-            .flatMap(g => {
-                const ids = g.time.availability?.appointment_segments?.map(s => s.team_member_id) || [];
-                if (ids.length === 0 && g.staff?.id && g.staff.id !== 'any') return [g.staff.id];
-                return ids;
-            });
+        const occupiedStaffIds = otherGuestsTimes
+            .filter(g => start < g.end && end > g.start)
+            .flatMap(g => g.staffIds);
 
         // 2. Conflict check
         if (activeGuest.staff?.id && activeGuest.staff.id !== 'any') {
@@ -167,7 +172,7 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
             });
             return !hasFreeOption;
         }
-    };
+    }, [activeGuestDuration, otherGuestsTimes, activeGuest.staff]);
 
     const guestServicesKey = JSON.stringify(bookableServices.map(s => s.id));
     const guestStaffId = activeGuest?.staff?.id;
@@ -481,13 +486,11 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
 
                                     return (
                                         <button key={time} disabled={isBlocked || isTooLate || isUnavailable} className={pillClass} onClick={() => {
-                                            const occupiedIds = guests.filter(g => g.id !== activeGuestId && g.time).filter(g => {
-                                                const gStart = timeToMinutes(g.time.time);
-                                                const gEnd = gStart + getGuestDurationMinutes(g);
-                                                const start = timeToMinutes(time);
-                                                const end = start + activeGuestDuration;
-                                                return start < gEnd && end > gStart;
-                                            }).flatMap(g => g.time.availability?.appointment_segments?.map(s => s.team_member_id) || []);
+                                            const start = timeToMinutes(time);
+                                            const end = start + activeGuestDuration;
+                                            const occupiedIds = otherGuestsTimes
+                                                .filter(g => start < g.end && end > g.start)
+                                                .flatMap(g => g.staffIds);
 
                                             const best = segments.find(seg => {
                                                 const req = seg.appointment_segments?.map(s => s.team_member_id) || [];

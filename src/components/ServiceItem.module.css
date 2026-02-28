@@ -104,7 +104,7 @@
 
 .bookButton:hover {
     background-color: var(--color-text);
-    color: rgba(255, 255, 255, 0.6);
+    color: #fff;
 }
 
 .bookButton:focus-visible {
@@ -150,6 +150,6 @@
 
 .addonButton:hover {
     background-color: #6366f1;
-    color: rgba(255, 255, 255, 0.6);
+    color: #fff;
     border-color: #6366f1;
 }

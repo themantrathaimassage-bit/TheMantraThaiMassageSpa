@@ -3,6 +3,20 @@ import { FiMapPin } from 'react-icons/fi';
 import styles from './AboutSection.module.css';
 
 const AboutSection = ({ venue }) => {
+    const getCurrentStatus = () => {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const openMinutes = 10 * 60; // 10:00 AM
+        const closeMinutes = 21 * 60; // 9:00 PM
+
+        if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) {
+            return { isOpen: false, text: 'Closed' };
+        }
+        return { isOpen: true, text: 'Open now' };
+    };
+
+    const status = getCurrentStatus();
+
     return (
         <div id="location" className={styles.container}>
             <h2 className={styles.title}>Location</h2>
@@ -40,9 +54,9 @@ const AboutSection = ({ venue }) => {
                 <div id="opening-hours" className={styles.hoursSide}>
                     <div className={styles.hoursHeader}>
                         <h3 className={styles.subtitle}>Opening hours</h3>
-                        <div className={styles.statusBadge}>
-                            <span className={styles.statusDot}></span>
-                            <span className={styles.statusText}>Open now</span>
+                        <div className={status.isOpen ? styles.statusBadge : styles.statusBadgeClosed}>
+                            <span className={status.isOpen ? styles.statusDot : styles.statusDotClosed}></span>
+                            <span className={status.isOpen ? styles.statusText : styles.statusTextClosed}>{status.text}</span>
                         </div>
                     </div>
                     <div className={styles.hoursList}>
@@ -58,7 +72,7 @@ const AboutSection = ({ venue }) => {
                                     isWeekend ? styles.isWeekend : ''
                                 ].join(' ')}>
                                     <span className={styles.day}>{item.day}</span>
-                                    <span className={styles.time}>{item.hours}</span>
+                                    <span className={styles.time}>10:00am - 9:00pm</span>
                                 </div>
                             );
                         })}

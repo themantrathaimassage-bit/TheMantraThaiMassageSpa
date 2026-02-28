@@ -5,42 +5,19 @@ import styles from './StickyBookingCard.module.css';
 const StickyBookingCard = ({ venue }) => {
     const getCurrentStatus = () => {
         const now = new Date();
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const currentDay = days[now.getDay()];
-
-        const todayHours = venue.openingHours.find(h => h.day === currentDay);
-
-        if (!todayHours || todayHours.hours === 'Closed') {
-            return { isOpen: false, text: 'Closed' };
-        }
-
-        const [openStr, closeStr] = todayHours.hours.split(' - ');
-
-        const parseTime = (timeStr) => {
-            const [time, modifier] = timeStr.split(/(am|pm)/);
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours);
-            minutes = parseInt(minutes);
-
-            if (modifier === 'pm' && hours < 12) hours += 12;
-            if (modifier === 'am' && hours === 12) hours = 0;
-
-            return hours * 60 + minutes;
-        };
-
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const openMinutes = parseTime(openStr);
-        const closeMinutes = parseTime(closeStr);
+        const openMinutes = 10 * 60; // 10:00 AM
+        const closeMinutes = 21 * 60; // 9:00 PM
 
         if (currentMinutes < openMinutes) {
-            return { isOpen: false, text: `Closed - opens at ${openStr}` };
+            return { isOpen: false, text: 'Closed - opens at 10:00am' };
         }
 
         if (currentMinutes >= closeMinutes) {
             return { isOpen: false, text: 'Closed' };
         }
 
-        return { isOpen: true, text: `Open until ${closeStr}` };
+        return { isOpen: true, text: 'Open until 9:00pm' };
     };
 
     const status = getCurrentStatus();
@@ -74,7 +51,7 @@ const StickyBookingCard = ({ venue }) => {
                         <li key={index} className={`${styles.hourItem} ${item.day === currentDayName ? styles.currentDay : ''}`}>
                             <span className={`${styles.day} ${item.day === currentDayName ? styles.bold : ''}`}>{item.day}</span>
                             <span className={`${styles.time} ${item.day === currentDayName ? styles.bold : ''}`}>
-                                {item.hours}
+                                10:00am - 9:00pm
                             </span>
                         </li>
                     ))}

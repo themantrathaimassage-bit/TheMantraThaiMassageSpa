@@ -15,53 +15,19 @@ const HeroSection = ({ venue }) => {
 
     const getCurrentStatus = () => {
         const now = new Date();
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const currentDay = days[now.getDay()];
-
-        const parseTime = (timeStr) => {
-            const [time, modifier] = timeStr.split(/(am|pm)/);
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours);
-            minutes = parseInt(minutes) || 0;
-            if (modifier === 'pm' && hours < 12) hours += 12;
-            if (modifier === 'am' && hours === 12) hours = 0;
-            return hours * 60 + minutes;
-        };
-
-        const getNextOpenText = (fromDayIndex) => {
-            for (let i = 1; i <= 7; i++) {
-                const nextIndex = (fromDayIndex + i) % 7;
-                const nextDay = days[nextIndex];
-                const nextHours = venue.openingHours.find(h => h.day === nextDay);
-                if (nextHours && nextHours.hours !== 'Closed') {
-                    const [openStr] = nextHours.hours.split(' - ');
-                    if (i === 1) return `Opens tmr ${openStr}`;
-                    return `Opens ${nextDay.slice(0, 3)} ${openStr}`;
-                }
-            }
-            return 'Closed';
-        };
-
-        const todayHours = venue.openingHours.find(h => h.day === currentDay);
-
-        if (!todayHours || todayHours.hours === 'Closed') {
-            return { isOpen: false, text: getNextOpenText(now.getDay()) };
-        }
-
-        const [openStr, closeStr] = todayHours.hours.split(' - ');
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const openMinutes = parseTime(openStr);
-        const closeMinutes = parseTime(closeStr);
+        const openMinutes = 10 * 60; // 10:00 AM
+        const closeMinutes = 21 * 60; // 9:00 PM
 
         if (currentMinutes < openMinutes) {
-            return { isOpen: false, text: `Opens at ${openStr}` };
+            return { isOpen: false, text: 'Opens at 10:00am' };
         }
 
         if (currentMinutes >= closeMinutes) {
-            return { isOpen: false, text: getNextOpenText(now.getDay()) };
+            return { isOpen: false, text: 'Opens tmr 10:00am' };
         }
 
-        return { isOpen: true, text: `Open until ${closeStr}` };
+        return { isOpen: true, text: 'Open until 9:00pm' };
     };
 
     const status = getCurrentStatus();
