@@ -143,12 +143,12 @@
 
 @media (max-width: 768px) {
     .header {
-        top: 84px;
-        /* 54 + ~30 */
+        top: 76px;
+        /* 44px header + ~32px tabs */
     }
 
     .singleGuest .header {
-        top: 48px;
+        top: 44px;
         margin-top: -12px;
         padding-top: 12px;
     }

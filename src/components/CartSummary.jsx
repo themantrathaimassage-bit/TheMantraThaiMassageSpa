@@ -69,6 +69,24 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
 
+    // Swipe UP on floating bar to open
+    const barTouchStartY = React.useRef(null);
+    const handleBarTouchStart = (e) => {
+        barTouchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleBarTouchEnd = (e) => {
+        if (!barTouchStartY.current) return;
+        const currentY = e.changedTouches[0].clientY;
+        const delta = barTouchStartY.current - currentY; // positive delta means swiped UP
+
+        // If swiped up more than 20px, open the review modal
+        if (delta > 20) {
+            setIsReviewOpen(true);
+        }
+        barTouchStartY.current = null;
+    };
+
     // Prevent background scrolling when mobile overlay is open
     useEffect(() => {
         if (isReviewOpen) {
@@ -136,6 +154,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                     onTouchStart={handleOverlayTouchStart}
                     onTouchMove={handleOverlayTouchMove}
                     onTouchEnd={handleOverlayTouchEnd}
+                    onClick={() => setIsReviewOpen(false)}
                 >
                     <span className={styles.overlayTitle}>Review your booking</span>
                     <button className={styles.closeOverlayBtn} onClick={() => setIsReviewOpen(false)}>
@@ -333,13 +352,25 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                 <div
                     className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}
                     onClick={() => setIsReviewOpen(true)}
+                    onTouchStart={handleBarTouchStart}
+                    onTouchEnd={handleBarTouchEnd}
                 >
                     {isDisabled && validationMsg ? (
                         <div className={styles.floatingValidation}>
+                            <div className={styles.pullUpIndicator}>
+                                <FiChevronUp className={`${styles.pullUpIcon} ${styles.pullUpIconError}`} />
+                                <FiChevronUp className={`${styles.pullUpIcon} ${styles.pullUpIconError}`} />
+                                <FiChevronUp className={`${styles.pullUpIcon} ${styles.pullUpIconError}`} />
+                            </div>
                             <span className={styles.validationText}>{validationMsg}</span>
                         </div>
                     ) : (
                         <div className={styles.floatingInfo}>
+                            <div className={styles.pullUpIndicator}>
+                                <FiChevronUp className={styles.pullUpIcon} />
+                                <FiChevronUp className={styles.pullUpIcon} />
+                                <FiChevronUp className={styles.pullUpIcon} />
+                            </div>
                             <div className={styles.floatingText}>
                                 <span className={styles.floatingTitle}>Your Booking</span>
                                 <span className={styles.floatingDetails}>

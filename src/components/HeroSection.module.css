@@ -86,6 +86,12 @@
     margin-right: var(--spacing-md);
 }
 
+@media (max-width: 768px) {
+    .venueName {
+        font-size: 22px;
+    }
+}
+
 .actions {
     display: flex;
     gap: var(--spacing-sm);

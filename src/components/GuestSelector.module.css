@@ -13,8 +13,8 @@
 
 @media (max-width: 768px) {
     .container {
-        top: 48px;
-        /* Sticks below mobile header (48px) */
+        top: 44px;
+        /* Sticks below mobile header (44px) */
     }
 }
 
@@ -134,7 +134,7 @@
 
     .tab,
     .addBtn {
-        padding: 6px 10px;
-        font-size: 14px;
+        padding: 4px 8px;
+        font-size: 13px;
     }
 }

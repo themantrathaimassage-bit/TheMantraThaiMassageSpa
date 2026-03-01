@@ -10,6 +10,12 @@
     align-items: center;
 }
 
+@media (max-width: 768px) {
+    .header {
+        height: 44px;
+    }
+}
+
 .container {
     max-width: 1400px;
     margin: 0 auto;
@@ -18,6 +24,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 12px;
+    }
 }
 
 .left {
@@ -30,6 +42,12 @@
     width: auto;
     object-fit: contain;
     transform: translateY(0px);
+}
+
+@media (max-width: 768px) {
+    .logoImage {
+        height: 36px;
+    }
 }
 
 .right {
@@ -205,6 +223,23 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+}
+
+@media (max-width: 768px) {
+    .mobileCallIconBtn {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+
+    .mobileBookBtnAction {
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+
+    .menuBtn {
+        font-size: 22px;
+    }
 }
 
 .mobileMenuDropdown {

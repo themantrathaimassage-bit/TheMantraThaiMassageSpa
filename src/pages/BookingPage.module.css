@@ -18,6 +18,8 @@
     justify-content: space-between;
 }
 
+
+
 .headerLeft {
     display: flex;
     align-items: center;
@@ -42,6 +44,7 @@
     font-size: 18px;
     font-weight: 700;
 }
+
 
 .headerRight {
     display: flex;
@@ -68,7 +71,7 @@
 
 @media (max-width: 768px) {
     .header {
-        height: 56px;
+        height: 44px;
         padding: 0 12px;
     }
 
@@ -77,19 +80,25 @@
     }
 
     .headerCallBtn {
-        padding: 8px;
-        width: 36px;
-        height: 36px;
+        padding: 6px;
+        width: 32px;
+        height: 32px;
         justify-content: center;
+        font-size: 13px;
     }
 
     .stepTitle {
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .closeBtn {
         width: 32px;
         height: 32px;
+    }
+
+    .closeBtn svg {
+        width: 20px;
+        height: 20px;
     }
 }
 
