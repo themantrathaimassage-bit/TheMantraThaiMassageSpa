@@ -23,6 +23,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
     const [isDragging, setIsDragging] = useState(false);
     const dragStartY = React.useRef(null);
     const overlayRef = React.useRef(null);
+    const floatingBarRef = React.useRef(null);
     const animationRef = React.useRef(null);
 
     const handleOverlayTouchStart = (e) => {
@@ -87,15 +88,51 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         barTouchStartY.current = null;
     };
 
-    // Prevent background scrolling when mobile overlay is open
+    // Explicitly prevent default scroll when swiping on the floating bar (iOS Safari fix)
     useEffect(() => {
+        const bar = floatingBarRef.current;
+        if (!bar) return;
+        const preventBarScroll = (e) => e.preventDefault();
+        bar.addEventListener('touchmove', preventBarScroll, { passive: false });
+        return () => bar.removeEventListener('touchmove', preventBarScroll);
+    }, [hasServices, isReviewOpen, bookingResult]);
+
+    // Prevent background scrolling when mobile overlay is open
+    // iOS Safari requires locking both html + body, and blocking touchmove
+    useEffect(() => {
+        const preventScroll = (e) => {
+            // Allow scrolling within the overlay itself
+            if (overlayRef.current && overlayRef.current.contains(e.target)) return;
+            e.preventDefault();
+        };
+
         if (isReviewOpen) {
+            const scrollY = window.scrollY;
             document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.documentElement.style.overflow = 'hidden';
+            document.addEventListener('touchmove', preventScroll, { passive: false });
         } else {
-            document.body.style.overflow = 'unset';
+            const scrollY = document.body.style.top;
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.documentElement.style.overflow = '';
+            document.removeEventListener('touchmove', preventScroll);
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
         }
         return () => {
-            document.body.style.overflow = 'unset';
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.documentElement.style.overflow = '';
+            document.removeEventListener('touchmove', preventScroll);
         };
     }, [isReviewOpen]);
 
@@ -350,6 +387,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
             {/* Mobile Floating Bar */}
             {hasServices && !isReviewOpen && bookingResult !== 'success' && (
                 <div
+                    ref={floatingBarRef}
                     className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}
                     onClick={() => setIsReviewOpen(true)}
                     onTouchStart={handleBarTouchStart}
