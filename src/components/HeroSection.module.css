@@ -80,7 +80,7 @@
 }
 
 .venueName {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--color-text);
     margin-right: var(--spacing-md);

@@ -1,5 +1,5 @@
 .header {
-    height: 64px;
+    height: 54px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     background-color: var(--color-surface);
     backdrop-filter: blur(10px);
@@ -26,10 +26,10 @@
 }
 
 .logoImage {
-    height: 75px;
+    height: 58px;
     width: auto;
     object-fit: contain;
-    transform: translateY(4px);
+    transform: translateY(0px);
 }
 
 .right {

@@ -372,7 +372,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                             }}
                             disabled={isBooking}
                         >
-                            {isBooking ? '...' : 'Book'}
+                            {isBooking ? '...' : (user ? `Book as ${user.firstName || (user.email ? user.email.split('@')[0] : 'Guest')}` : 'Log in / Sign up')}
                         </button>
                     )}
                 </div>

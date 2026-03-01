@@ -123,7 +123,7 @@
 /* ── Header row ── */
 .header {
     position: sticky;
-    top: 106px;
+    top: 94px;
     /* Adjusted tops */
     z-index: 65;
     background: rgba(255, 253, 250, 0.65);
@@ -143,8 +143,8 @@
 
 @media (max-width: 768px) {
     .header {
-        top: 96px;
-        /* 48 + ~48 */
+        top: 84px;
+        /* 54 + ~30 */
     }
 
     .singleGuest .header {
@@ -756,7 +756,7 @@
 
 .confirmHeader h3 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
 }
 
