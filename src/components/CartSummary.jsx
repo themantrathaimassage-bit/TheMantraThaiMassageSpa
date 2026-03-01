@@ -334,9 +334,6 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
                     className={`${styles.floatingBar} ${isDisabled ? styles.floatingBarDisabled : ''}`}
                     onClick={() => setIsReviewOpen(true)}
                 >
-                    <div className={styles.floatingChevronWrapper}>
-                        <FiChevronUp className={styles.floatingChevronIcon} />
-                    </div>
                     {isDisabled && validationMsg ? (
                         <div className={styles.floatingValidation}>
                             <span className={styles.validationText}>{validationMsg}</span>

@@ -947,37 +947,6 @@
         animation: floatIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     }
 
-    .floatingChevronWrapper {
-        position: absolute;
-        top: -24px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #ffffff;
-        border-radius: 24px 24px 0 0;
-        width: 64px;
-        height: 25px;
-        /* slightly overlap (top: -24, h: 25) to prevent gap rendering bugs */
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding-top: 4px;
-    }
-
-    .floatingChevronIcon {
-        color: #94a3b8;
-        font-size: 24px;
-        stroke-width: 2.5;
-        /* Note: Requires SVG support, but works natively with some react-icons if stroke is inherited */
-    }
-
-    .floatingBarDisabled .floatingChevronWrapper {
-        background: #fafafa;
-    }
-
-    .floatingBarDisabled .floatingChevronIcon {
-        color: #f43f5e;
-    }
-
     .floatingInfo {
         flex: 1;
         display: flex;
@@ -1011,11 +980,6 @@
     .floatingDetails strong {
         color: #8b5cf6;
         font-weight: 700;
-    }
-
-    .floatingChevron {
-        color: #94a3b8;
-        font-size: 18px;
     }
 
     .floatingContinueBtn,
