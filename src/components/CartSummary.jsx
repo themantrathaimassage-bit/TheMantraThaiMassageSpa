@@ -54,7 +54,7 @@ const CartSummary = ({ guests, activeGuestId, totalPrice, totalDuration, onConti
         const finalDelta = dragStartY.lastDelta || 0;
 
         // Requires a really deep, deliberate swipe down (~350px) to close the modal
-        if (finalDelta > 350) {
+        if (finalDelta > 200) {
             setIsReviewOpen(false);
         } else {
             // Snap back
