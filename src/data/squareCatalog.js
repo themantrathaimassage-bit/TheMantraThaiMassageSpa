@@ -257,14 +257,15 @@ export async function fetchSquareServices() {
  */
 export async function fetchSquareTeamMembers() {
     try {
-        // 1. Try Bookings API (specifically for bookable staff members)
-        const staffRes = await fetch(`/api/square/v2/bookings/staff-members?location_id=${LOCATION_ID}`, {
+        // 1. Try Bookings API (specifically for booking profiles which contain display_name)
+        const staffRes = await fetch(`/api/square/v2/bookings/team-member-booking-profiles?location_id=${LOCATION_ID}`, {
             headers: HEADERS,
         });
         if (staffRes.ok) {
             const staffData = await staffRes.json();
-            if (staffData.staff_members && staffData.staff_members.length > 0) {
-                return staffData.staff_members;
+            if (staffData.team_member_booking_profiles && staffData.team_member_booking_profiles.length > 0) {
+                // Filter for bookable and map to match expected format in BookingPage
+                return staffData.team_member_booking_profiles.filter(p => p.is_bookable);
             }
         }
 

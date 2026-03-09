@@ -47,7 +47,7 @@ const BookingPage = () => {
         import('../data/squareCatalog').then(m => m.fetchSquareTeamMembers()).then(team => {
             if (team && team.length > 0) {
                 const formattedTeam = team.map(m => ({
-                    id: m.id,
+                    id: m.team_member_id || m.id,
                     name: m.display_name || (m.given_name ? `${m.given_name} ${m.family_name || ''}`.trim() : 'Professional'),
                     image: null
                 }));
