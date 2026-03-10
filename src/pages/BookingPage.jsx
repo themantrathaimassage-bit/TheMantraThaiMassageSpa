@@ -47,9 +47,9 @@ const BookingPage = () => {
         import('../data/squareCatalog').then(m => m.fetchSquareTeamMembers()).then(team => {
             if (team && team.length > 0) {
                 const formattedTeam = team.map(m => ({
-                    id: m.team_member_id || m.id,
-                    name: m.display_name || (m.given_name ? `${m.given_name} ${m.family_name || ''}`.trim() : 'Professional'),
-                    image: null
+                    id: m.id,
+                    name: m.name || 'Professional',
+                    image: m.image || null
                 }));
                 // Filter to ensure unique IDs (just in case of overlap or data issues)
                 const uniqueTeam = [];

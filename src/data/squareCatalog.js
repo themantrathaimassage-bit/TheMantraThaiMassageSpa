@@ -257,15 +257,23 @@ export async function fetchSquareServices() {
  */
 export async function fetchSquareTeamMembers() {
     try {
-        // 1. Try Bookings API (specifically for booking profiles which contain display_name)
-        const staffRes = await fetch(`/api/square/v2/bookings/team-member-booking-profiles?location_id=${LOCATION_ID}`, {
+        // 1. Use the Booking Profiles endpoint as the primary source.
+        // This is where "Online Booking Names" (display_name) come from.
+        const response = await fetch(`/api/square/v2/bookings/team-member-booking-profiles?location_id=${LOCATION_ID}`, {
             headers: HEADERS,
         });
-        if (staffRes.ok) {
-            const staffData = await staffRes.json();
-            if (staffData.team_member_booking_profiles && staffData.team_member_booking_profiles.length > 0) {
-                // Filter for bookable and map to match expected format in BookingPage
-                return staffData.team_member_booking_profiles.filter(p => p.is_bookable);
+
+        if (response.ok) {
+            const data = await response.json();
+            const profiles = data.team_member_booking_profiles || [];
+
+            if (profiles.length > 0) {
+                // Map to the format the UI expects, ensuring we use team_member_id
+                return profiles.filter(p => p.is_bookable).map(p => ({
+                    id: p.team_member_id,
+                    name: p.display_name || 'Professional',
+                    image: null // Can be enhanced later if images are needed
+                }));
             }
         }
 
