@@ -257,32 +257,25 @@ export async function fetchSquareServices() {
  */
 export async function fetchSquareTeamMembers() {
     try {
-        // 1. Fetch both the actual bookable staff for this location AND the booking profiles
-        const [staffRes, profilesRes] = await Promise.all([
-            fetch(`/api/square/v2/bookings/staff-members?location_id=${LOCATION_ID}`, { headers: HEADERS }),
-            fetch(`/api/square/v2/bookings/team-member-booking-profiles?location_id=${LOCATION_ID}`, { headers: HEADERS })
-        ]);
+        // 1. Use the Booking Profiles endpoint as the primary source.
+        // This is where "Online Booking Names" (display_name) come from.
+        const response = await fetch(`/api/square/v2/bookings/team-member-booking-profiles?location_id=${LOCATION_ID}`, {
+            headers: HEADERS,
+        });
 
-        if (!staffRes.ok) throw new Error(`Staff API error: ${staffRes.status}`);
+        if (response.ok) {
+            const data = await response.json();
+            const profiles = data.team_member_booking_profiles || [];
 
-        const staffData = await staffRes.json();
-        const activeStaff = (staffData.staff_members || []).filter(s => s.status === 'ACTIVE');
-
-        let profilesMap = {};
-        if (profilesRes.ok) {
-            const profilesData = await profilesRes.json();
-            (profilesData.team_member_booking_profiles || []).forEach(p => {
-                profilesMap[p.team_member_id] = p.display_name;
-            });
+            if (profiles.length > 0) {
+                // Map to the format the UI expects, ensuring we use team_member_id
+                return profiles.filter(p => p.is_bookable).map(p => ({
+                    id: p.team_member_id,
+                    name: p.display_name || 'Professional',
+                    image: null // Can be enhanced later if images are needed
+                }));
+            }
         }
-
-        // 2. Map the active staff to the UI format, using display_name from profiles if available
-        return activeStaff.map(member => ({
-            id: member.id,
-            // Use display_name from profile first, then given_name, then 'Professional'
-            name: profilesMap[member.id] || member.display_name || member.given_name || 'Professional',
-            image: null
-        }));
 
         // 2. Fallback to Team API search if Bookings API is empty or fails
         const teamRes = await fetch('/api/square/v2/team-members/search', {
