@@ -313,7 +313,7 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
             const periodSlots = allPossible.filter(s => {
                 const hour = parseInt(s.split(':')[0]);
                 if (!p.test(hour)) return false;
-                if (isToday && timeToMinutes(s) < currentMins + 30) return false;
+                if (isToday && timeToMinutes(s) < currentMins) return false;
                 return true;
             });
             return {
