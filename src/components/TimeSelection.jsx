@@ -245,11 +245,9 @@ const TimeSelection = ({ guests, activeGuestId, onGuestSwitch, onSelect, staffMe
                     const newMap = {};
                     const slots = new Set();
                     const now = new Date();
-                    const leadTimeMs = 30 * 60000;
-
                     allAvs.forEach(av => {
                         const t = new Date(av.start_at);
-                        if (t.getTime() < now.getTime() + leadTimeMs) return;
+                        if (t.getTime() < now.getTime()) return; // Only filter out past times, not near-future ones.
 
                         const h = String(t.getHours()).padStart(2, '0');
                         const m = String(t.getMinutes()).padStart(2, '0');
