@@ -406,6 +406,40 @@ const BookingPage = () => {
         return "";
     }, [currentStep]);
 
+    const isMaintenanceMode = true;
+
+    if (isMaintenanceMode) {
+        return (
+            <div className={styles.page}>
+                <div className={styles.header}>
+                    <div className={styles.headerLeft}>
+                        <Link to="/" className={styles.closeBtn}><FiX size={24} /></Link>
+                        <span className={styles.stepTitle}>Maintenance</span>
+                    </div>
+                </div>
+                <div className={styles.maintenanceWrapper}>
+                    <div className={styles.maintenanceCard}>
+                        <div className={styles.maintenanceIconWrapper}>
+                            <FiPhone size={40} />
+                        </div>
+                        <h1 className={styles.maintenanceTitle}>Status: Under Maintenance</h1>
+                        <p className={styles.maintenanceText}>
+                            Our online booking system is currently being updated to serve you better. We'll be back online soon in <strong>April</strong>.
+                        </p>
+                        <div style={{ margin: '8px 0' }}>
+                            <p className={styles.maintenanceText}>Please call us directly to book your appointment:</p>
+                        </div>
+                        <a href="tel:0493853415" className={styles.maintenanceCallBtn}>
+                            <FiPhone size={20} />
+                            <span>0493 853 415</span>
+                        </a>
+                        <p className={styles.maintenanceFooter}>We apologize for any inconvenience.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.page}>
             <div className={styles.header}>
