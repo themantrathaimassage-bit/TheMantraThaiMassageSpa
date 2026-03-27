@@ -232,11 +232,19 @@ const BookingPage = () => {
         g.services.some(s => s.name?.toLowerCase().includes('cash only') || s.baseServiceName?.toLowerCase().includes('cash only'))
     );
 
+    const isMaintenanceMode = true;
+
     const handleBook = async () => {
         if (!user) {
             openAuth({ returnTo: '/booking' });
             return;
         }
+        
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
+
         // Show cash-only confirmation first
         if (hasCashOnlyService) {
             setShowCashModal(true);
@@ -406,40 +414,6 @@ const BookingPage = () => {
         return "";
     }, [currentStep]);
 
-    const isMaintenanceMode = true;
-
-    if (isMaintenanceMode) {
-        return (
-            <div className={styles.page}>
-                <div className={styles.header}>
-                    <div className={styles.headerLeft}>
-                        <Link to="/" className={styles.closeBtn}><FiX size={24} /></Link>
-                        <span className={styles.stepTitle}>Maintenance</span>
-                    </div>
-                </div>
-                <div className={styles.maintenanceWrapper}>
-                    <div className={styles.maintenanceCard}>
-                        <div className={styles.maintenanceIconWrapper}>
-                            <FiPhone size={40} />
-                        </div>
-                        <h1 className={styles.maintenanceTitle}>Status: Under Maintenance</h1>
-                        <p className={styles.maintenanceText}>
-                            Our online booking system is currently being updated to serve you better. We'll be back online soon in <strong>April</strong>.
-                        </p>
-                        <div style={{ margin: '8px 0' }}>
-                            <p className={styles.maintenanceText}>Please call us directly to book your appointment:</p>
-                        </div>
-                        <a href="tel:0493853415" className={styles.maintenanceCallBtn}>
-                            <FiPhone size={20} />
-                            <span>0493 853 415</span>
-                        </a>
-                        <p className={styles.maintenanceFooter}>We apologize for any inconvenience.</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className={styles.page}>
             <div className={styles.header}>
@@ -555,6 +529,33 @@ const BookingPage = () => {
                     onConfirm={handleCashConfirm}
                     onCancel={() => setShowCashModal(false)}
                 />
+            )}
+
+            {bookingResult === 'maintenance' && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div className={styles.maintenanceCard}>
+                        <div className={styles.maintenanceIconWrapper}>
+                            <FiPhone size={40} />
+                        </div>
+                        <h1 className={styles.maintenanceTitle}>Almost there!</h1>
+                        <p className={styles.maintenanceText}>
+                            Our online system is temporarily paused for updates until <strong>April</strong>.
+                        </p>
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <p className={styles.maintenanceText}>Please call us to confirm your selected time:</p>
+                        </div>
+                        <a href="tel:0493853415" className={styles.maintenanceCallBtn}>
+                            <FiPhone size={20} />
+                            <span>Call 0493 853 415</span>
+                        </a>
+                        <button 
+                            onClick={() => setBookingResult(null)} 
+                            style={{ marginTop: '16px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            Back to Booking
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
