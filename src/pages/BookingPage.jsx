@@ -153,6 +153,10 @@ const BookingPage = () => {
     }, []);
 
     const handleServiceSelect = React.useCallback((service) => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
         // If it's an add-on already selected → toggle off (remove)
         if (service.isAddon) {
             const alreadySelected = activeGuest.services.find(s => s.id === service.id);
@@ -539,7 +543,7 @@ const BookingPage = () => {
                         </div>
                         <h1 className={styles.maintenanceTitle}>Almost there!</h1>
                         <p className={styles.maintenanceText}>
-                            Our online system is temporarily paused for updates until <strong>April</strong>.
+                            Our online system is temporarily paused for updates until <strong>June</strong>.
                         </p>
                         <div style={{ margin: '8px 0', textAlign: 'center' }}>
                             <p className={styles.maintenanceText}>Please call us to confirm your selected time:</p>
