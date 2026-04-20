@@ -6,7 +6,7 @@ const AboutSection = ({ venue }) => {
     const getCurrentStatus = () => {
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const openMinutes = 10 * 60; // 10:00 AM
+        const openMinutes = 9 * 60; // 9:00 AM
         const closeMinutes = 21 * 60; // 9:00 PM
 
         if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) {
@@ -72,7 +72,7 @@ const AboutSection = ({ venue }) => {
                                     isWeekend ? styles.isWeekend : ''
                                 ].join(' ')}>
                                     <span className={styles.day}>{item.day}</span>
-                                    <span className={styles.time}>10:00am - 9:00pm</span>
+                                    <span className={styles.time}>9:00am - 9:00pm</span>
                                 </div>
                             );
                         })}

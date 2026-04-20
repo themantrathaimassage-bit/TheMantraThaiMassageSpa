@@ -109,6 +109,10 @@ const BookingPage = () => {
     }, []);
 
     const handleServiceSelect = React.useCallback((service) => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
         if (service.isAddon) {
             const alreadySelected = activeGuest.services.find(s => s.id === service.id);
             if (alreadySelected) { updateGuest(activeGuestId, { services: activeGuest.services.filter(s => s.id !== service.id), time: null }); return; }
@@ -122,9 +126,19 @@ const BookingPage = () => {
         else { updateGuest(activeGuestId, { services: [...activeGuest.services, service], time: null }); }
     }, [activeGuest, activeGuestId, updateGuest]);
 
-    const handleStaffSelect = React.useCallback((staff) => updateGuest(activeGuestId, { staff }), [activeGuestId, updateGuest]);
+    const handleStaffSelect = React.useCallback((staff) => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
+        updateGuest(activeGuestId, { staff });
+    }, [activeGuestId, updateGuest]);
 
     const handleTimeSelect = React.useCallback((guestId, date, time, availability) => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
         setGuests(prev => {
             const guest = prev.find(g => g.id === guestId);
             if (!guest) return prev;
