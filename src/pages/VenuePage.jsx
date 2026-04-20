@@ -20,7 +20,7 @@ const VenuePage = () => {
     const [servicesLoading, setServicesLoading] = useState(true);
     const [reviews, setReviews] = useState(reviewsData);
     const [showMaintenance, setShowMaintenance] = useState(false);
-    const isMaintenanceMode = false;
+    const isMaintenanceMode = true;
 
     const { addService, selectedServices } = useCart();
     const navigate = useNavigate();

@@ -207,12 +207,12 @@ async function syncReviews() {
         }).filter(r => r.comment.length > 5);
 
         const map = new Map();
-        existing.forEach(r => { if (r.user) map.set(r.user.toLowerCase().trim(), r); });
-        fetched.forEach(r => { if (r.user) map.set(r.user.toLowerCase().trim(), r); });
+        existing.forEach(r => { if (r.id) map.set(r.id, r); });
+        fetched.forEach(r => { if (r.id) map.set(r.id, r); });
 
         const final = Array.from(map.values())
             .sort((a, b) => (b.rawTime || 0) - (a.rawTime || 0))
-            .slice(0, 50);
+            .slice(0, 200); // Increased limit to 200 reviews
 
         if (final.length > 0) {
             const reviewsDataObj = {

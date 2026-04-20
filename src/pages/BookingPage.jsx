@@ -143,9 +143,13 @@ const BookingPage = () => {
         });
     }, []);
 
-    const isMaintenanceMode = false; // Always false for now
+    const isMaintenanceMode = true; // Set to true to show call message
 
     const handleBook = async () => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
         if (!guestInfo.name || !guestInfo.phone) { alert("Please provide your name and phone number."); return; }
         if (!turnstileToken) { alert("Please complete the bot check."); return; }
         if (guests.some(g => g.services.some(s => s.name?.toLowerCase().includes('cash only')))) { setShowCashModal(true); return; }
@@ -235,6 +239,33 @@ const BookingPage = () => {
             {bookingResult === 'success' && successGuests && <BookingSuccessModal guests={successGuests} onClose={() => setBookingResult(null)} />}
             {bookingResult === 'error' && bookingErrors.length > 0 && <BookingErrorModal errors={bookingErrors} onRetry={() => { setBookingResult(null); setGuests(guests.map(g => ({ ...g, time: null }))); setActiveGuestId(guests[0].id); setCurrentStep(3); }} />}
             {showCashModal && <CashOnlyModal onConfirm={() => { setShowCashModal(false); executeBooking(); }} onCancel={() => setShowCashModal(false)} />}
+            
+            {bookingResult === 'maintenance' && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ background: 'white', borderRadius: 32, padding: '48px 32px', maxWidth: 480, width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+                        <div style={{ width: 80, height: 80, background: '#fff7ed', color: '#f97316', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                            <FiPhone size={40} />
+                        </div>
+                        <h1 style={{ fontSize: 28, fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2, margin: '16px 0 8px 0' }}>Almost there!</h1>
+                        <p style={{ fontSize: 16, color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+                            Our online system is temporarily paused for updates until <strong>June</strong>.
+                        </p>
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <p style={{ fontSize: 16, color: '#64748b', margin: 0 }}>Please call us to confirm your selected time:</p>
+                        </div>
+                        <a href="tel:0493853415" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', padding: '16px 32px', boxSizing: 'border-box', background: '#1a1a1a', color: 'white', borderRadius: 100, textDecoration: 'none', fontWeight: 700, fontSize: 16, marginTop: 12 }}>
+                            <FiPhone size={20} />
+                            <span>Call 0493 853 415</span>
+                        </a>
+                        <button 
+                            onClick={() => setBookingResult(null)} 
+                            style={{ marginTop: '16px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            Back to Booking
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
