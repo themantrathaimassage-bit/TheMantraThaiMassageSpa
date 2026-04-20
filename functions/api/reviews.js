@@ -1,43 +1,41 @@
 export async function onRequest(context) {
     const { env } = context;
-    
-    // 1. Check cache in Firebase (REST)
-    try {
-        if (env.FIREBASE_DATABASE_URL && env.FIREBASE_SECRET) {
-            const dbUrl = `${env.FIREBASE_DATABASE_URL}/square/googleReviewsData.json?auth=${env.FIREBASE_SECRET}`;
-            const res = await fetch(dbUrl);
-            if (res.ok) {
-                const data = await res.json();
-                if (data) {
-                    return new Response(JSON.stringify(data), {
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Cache-Control': 'public, max-age=1800' // 30 mins browser cache
-                        }
-                    });
-                }
-            }
-        }
-    } catch (err) {
-        console.error('Reviews storage error:', err);
-    }
-
-    // 2. Fetch from Google if not in storage (Fallback)
     const GOOGLE_API_KEY = env.GOOGLE_MAPS_API_KEY;
     const PLACE_ID = 'ChIJUYEDwxGxEmsRziWxb3tic7k';
 
+    // 1. Check if we have reviews in KV (Cloudflare Storage)
+    if (env.BOOKING_KV) {
+        try {
+            const cached = await env.BOOKING_KV.get('google_reviews');
+            if (cached) {
+                const reviewsData = JSON.parse(cached);
+                // If data is less than 24 hours old, return it
+                if (reviewsData.lastUpdated && (Date.now() - reviewsData.lastUpdated < 86400000)) {
+                    return new Response(cached, {
+                        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('KV Read Error:', err);
+        }
+    }
+
+    // 2. Fetch fresh reviews from Google if no cache or expired
     if (!GOOGLE_API_KEY) {
-        return new Response(JSON.stringify({ error: 'Missing API Key' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Missing Google API Key' }), { 
+            status: 500,
+            headers: { 'Access-Control-Allow-Origin': '*' }
+        });
     }
 
     try {
-        const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&reviews_sort=newest&key=${GOOGLE_API_KEY}`;
+        const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=reviews,rating,user_ratings_total&reviews_sort=newest&key=${GOOGLE_API_KEY}&language=en`;
         const resp = await fetch(url);
         const data = await resp.json();
 
         if (data.status !== 'OK') throw new Error(data.error_message || data.status);
 
-        // Transform (Same logic as server.js)
         const reviews = (data.result.reviews || []).map(r => ({
             id: `google-${r.time}-${r.author_name}`,
             user: r.author_name,
@@ -52,12 +50,27 @@ export async function onRequest(context) {
             reviews: reviews,
             rating: data.result.rating || 5.0,
             user_ratings_total: data.result.user_ratings_total || 0,
+            lastUpdated: Date.now()
         };
 
-        return new Response(JSON.stringify(reviewsDataObj), {
-            headers: { 'Content-Type': 'application/json' }
+        const jsonResponse = JSON.stringify(reviewsDataObj);
+
+        // 3. Save to KV for next time (Caching)
+        if (env.BOOKING_KV) {
+            await env.BOOKING_KV.put('google_reviews', jsonResponse);
+        }
+
+        return new Response(jsonResponse, {
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Access-Control-Allow-Origin': '*',
+                'X-Source': 'Google-Live'
+            }
         });
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+        return new Response(JSON.stringify({ error: err.message }), { 
+            status: 500,
+            headers: { 'Access-Control-Allow-Origin': '*' }
+        });
     }
 }
