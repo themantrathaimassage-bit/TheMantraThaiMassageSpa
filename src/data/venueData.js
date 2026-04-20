@@ -13,13 +13,13 @@ export const venueData = {
     "/images/new_venue_3.jpg"
   ],
   openingHours: [
-    { day: 'Monday', hours: '10:00am - 9:00pm' },
-    { day: 'Tuesday', hours: '10:00am - 9:00pm' },
-    { day: 'Wednesday', hours: '10:00am - 9:00pm' },
-    { day: 'Thursday', hours: '10:00am - 9:00pm' },
-    { day: 'Friday', hours: '10:00am - 9:00pm' },
-    { day: 'Saturday', hours: '10:00am - 9:00pm' },
-    { day: 'Sunday', hours: '10:00am - 9:00pm' }
+    { day: 'Monday', hours: '9:00am - 9:00pm' },
+    { day: 'Tuesday', hours: '9:00am - 9:00pm' },
+    { day: 'Wednesday', hours: '9:00am - 9:00pm' },
+    { day: 'Thursday', hours: '9:00am - 9:00pm' },
+    { day: 'Friday', hours: '9:00am - 9:00pm' },
+    { day: 'Saturday', hours: '9:00am - 9:00pm' },
+    { day: 'Sunday', hours: '9:00am - 9:00pm' }
   ],
   reviews: {}
 };
