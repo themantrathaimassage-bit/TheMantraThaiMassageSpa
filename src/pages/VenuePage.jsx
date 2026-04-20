@@ -41,10 +41,8 @@ const VenuePage = () => {
         // Fetch Location Info (Opening Hours only, to prevent overwriting address with Bowral)
         import('../data/squareCatalog').then(m => m.fetchSquareLocation()).then(liveLoc => {
             if (!controller.signal.aborted && liveLoc) {
-                setVenue(prev => ({
-                    ...prev,
-                    openingHours: liveLoc.openingHours || prev.openingHours
-                }));
+                // Keep manual opening hours for now as requested
+                // setVenue(prev => ({ ...prev, openingHours: liveLoc.openingHours || prev.openingHours }));
             }
         });
 

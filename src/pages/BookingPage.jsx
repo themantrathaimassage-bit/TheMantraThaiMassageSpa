@@ -176,6 +176,10 @@ const BookingPage = () => {
     };
 
     const handleContinue = () => {
+        if (isMaintenanceMode) {
+            setBookingResult('maintenance');
+            return;
+        }
         if (currentStep === 1 && activeGuest.services.length > 0) {
             const nextG = guests.find(g => g.services.length === 0);
             if (nextG) setActiveGuestId(nextG.id);
