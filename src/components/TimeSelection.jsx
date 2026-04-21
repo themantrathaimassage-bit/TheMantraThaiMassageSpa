@@ -8,7 +8,7 @@ const PERIODS = [
 ];
 
 // ── Store Hours (fixed, independent of Square config) ──────────────────────
-const STORE_OPEN_HOUR = 10;   // 10:00 AM
+const STORE_OPEN_HOUR = 9;    // 9:00 AM
 const STORE_CLOSE_HOUR = 21;   // 9:00 PM
 
 // Last booking slot shown in the grid

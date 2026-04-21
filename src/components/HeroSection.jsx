@@ -16,15 +16,15 @@ const HeroSection = ({ venue }) => {
     const getCurrentStatus = () => {
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const openMinutes = 10 * 60; // 10:00 AM
+        const openMinutes = 9 * 60; // 9:00 AM
         const closeMinutes = 21 * 60; // 9:00 PM
 
         if (currentMinutes < openMinutes) {
-            return { isOpen: false, text: 'Opens at 10:00am' };
+            return { isOpen: false, text: 'Opens at 9:00am' };
         }
 
         if (currentMinutes >= closeMinutes) {
-            return { isOpen: false, text: 'Opens tmr 10:00am' };
+            return { isOpen: false, text: 'Opens tmr 9:00am' };
         }
 
         return { isOpen: true, text: 'Open until 9:00pm' };

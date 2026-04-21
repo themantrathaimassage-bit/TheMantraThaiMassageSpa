@@ -6,11 +6,11 @@ const StickyBookingCard = ({ venue }) => {
     const getCurrentStatus = () => {
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        const openMinutes = 10 * 60; // 10:00 AM
+        const openMinutes = 9 * 60; // 9:00 AM
         const closeMinutes = 21 * 60; // 9:00 PM
 
         if (currentMinutes < openMinutes) {
-            return { isOpen: false, text: 'Closed - opens at 10:00am' };
+            return { isOpen: false, text: 'Closed - opens at 9:00am' };
         }
 
         if (currentMinutes >= closeMinutes) {
@@ -51,7 +51,7 @@ const StickyBookingCard = ({ venue }) => {
                         <li key={index} className={`${styles.hourItem} ${item.day === currentDayName ? styles.currentDay : ''}`}>
                             <span className={`${styles.day} ${item.day === currentDayName ? styles.bold : ''}`}>{item.day}</span>
                             <span className={`${styles.time} ${item.day === currentDayName ? styles.bold : ''}`}>
-                                10:00am - 9:00pm
+                                9:00am - 9:00pm
                             </span>
                         </li>
                     ))}
