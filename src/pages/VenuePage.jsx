@@ -28,17 +28,15 @@ const VenuePage = () => {
     // Data Fetching with AbortController for cleanup
     useEffect(() => {
         const controller = new AbortController();
-        setServicesLoading(true);
+        
+        // Use local snapshot data instead of fetching live Square catalog
+        // to prevent menu disappearing during maintenance
+        if (servicesData?.length > 0) {
+            setServices(servicesData);
+        }
+        setServicesLoading(false);
 
-        // Fetch Services
-        fetchSquareServices().then(live => {
-            if (!controller.signal.aborted && live?.length > 0) setServices(live);
-            setServicesLoading(false);
-        }).catch(() => {
-            if (!controller.signal.aborted) setServicesLoading(false);
-        });
-
-        // Fetch Location Info (Opening Hours only, to prevent overwriting address with Bowral)
+        // Fetch Location Info (Opening Hours remain helpful)
         import('../data/squareCatalog').then(m => m.fetchSquareLocation()).then(liveLoc => {
             if (!controller.signal.aborted && liveLoc) {
                 // Keep manual opening hours for now as requested
