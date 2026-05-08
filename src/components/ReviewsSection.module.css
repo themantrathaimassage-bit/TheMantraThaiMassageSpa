@@ -293,10 +293,10 @@
     transition: all 0.2s ease;
 }
 
-.seeMoreBtn:hover {
-    background: #e9ecef;
-    border-color: #d2d2d2;
-    text-decoration: none;
+@media (min-width: 768px) {
+    .seeMoreBtn {
+        display: none !important;
+    }
 }
 
 .sectionFooter {

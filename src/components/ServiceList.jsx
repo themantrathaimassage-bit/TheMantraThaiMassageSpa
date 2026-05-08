@@ -17,6 +17,7 @@ const isAddonGroup = (group) => {
 };
 
 const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoading, buttonText, selectedIds = [] }) => {
+    const [showAll, setShowAll] = React.useState(false);
     const mainServices = useMemo(() => services.filter(g => !isAddonGroup(g)), [services]);
     const addonServices = useMemo(() => services.filter(g => isAddonGroup(g)), [services]);
 
@@ -67,11 +68,11 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
         setActiveCategory(category);
     };
 
-    // If searching, show all main categories. Otherwise, filter by active tab.
-    const displayServices = useMemo(() => isSearching
+    // If searching or "showAll" is active, show everything. Otherwise, filter by active tab.
+    const displayServices = useMemo(() => (isSearching || showAll)
         ? mainServices
         : mainServices.filter(group => group.category === activeCategory),
-        [isSearching, mainServices, activeCategory]
+        [isSearching, showAll, mainServices, activeCategory]
     );
 
     // Loading skeleton
@@ -99,7 +100,7 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
 
     return (
         <div className={styles.container}>
-            {!isSearching && mainServices.length > 0 && (
+            {!isSearching && !showAll && mainServices.length > 0 && (
                 <div className={styles.tabsContainer} ref={tabsRef}>
                     <div className={styles.tabsInner}>
                         {mainServices.map((group) => (
@@ -119,7 +120,7 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
                 {displayServices.length > 0 ? (
                     displayServices.map((group) => (
                         <div key={group.category} className={styles.categorySection}>
-                            {isSearching && <h2 className={styles.categoryTitle}>{group.category}</h2>}
+                            {(isSearching || showAll) && <h2 className={styles.categoryTitle}>{group.category}</h2>}
                             <div className={styles.serviceGrid}>
                                 {group.items.map((service) => (
                                     <ServiceCard
@@ -171,10 +172,14 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
                 </div>
             )}
 
-            {!hideSeeAll && (
-                <a href="https://book.squareup.com/appointments/8qrb90zh045s17/location/LY3JYWKY4FHHQ/services?authuser=1&rwg_token=AFd1xnEmp34DaOnnMyObCkq-2UQnxG50GUiaQjzw7ZJsSpaxqz0XDnVG1mmuTT15VOxIX5w6gIpNp1l1Gbo2GCQBZ-a1NIszfA%3D%3D" className={styles.seeAllBtn}>
-                    See all services
-                </a>
+            {!hideSeeAll && !showAll && !isSearching && (
+                <button 
+                    onClick={() => setShowAll(true)} 
+                    className={styles.seeAllBtn}
+                    style={{ background: 'none', border: '1px solid #e2e8f0', width: '100%', padding: '16px', borderRadius: '12px', color: '#64748b', fontWeight: '600', cursor: 'pointer' }}
+                >
+                    Show all services
+                </button>
             )}
         </div>
     );
