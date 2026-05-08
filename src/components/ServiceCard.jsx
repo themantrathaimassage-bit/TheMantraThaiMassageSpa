@@ -59,7 +59,6 @@ const ServiceCard = ({ service, onSelect, selectedIds = [], buttonText }) => {
                             <p className={styles.description}>
                                 {service.description}
                             </p>
-                            <span className={styles.moreLink}>read more</span>
                         </div>
                     )}
 
