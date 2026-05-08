@@ -172,9 +172,9 @@ const ServiceList = ({ services, onServiceSelect, isSearching, hideSeeAll, isLoa
             )}
 
             {!hideSeeAll && (
-                <Link to="/booking" className={styles.seeAllBtn}>
+                <a href="https://book.squareup.com/appointments/8qrb90zh045s17/location/LY3JYWKY4FHHQ/services?authuser=1&rwg_token=AFd1xnEmp34DaOnnMyObCkq-2UQnxG50GUiaQjzw7ZJsSpaxqz0XDnVG1mmuTT15VOxIX5w6gIpNp1l1Gbo2GCQBZ-a1NIszfA%3D%3D" className={styles.seeAllBtn}>
                     See all services
-                </Link>
+                </a>
             )}
         </div>
     );

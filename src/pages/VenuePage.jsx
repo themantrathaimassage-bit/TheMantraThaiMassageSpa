@@ -20,7 +20,7 @@ const VenuePage = () => {
     const [servicesLoading, setServicesLoading] = useState(true);
     const [reviews, setReviews] = useState(reviewsData);
     const [showMaintenance, setShowMaintenance] = useState(false);
-    const isMaintenanceMode = true;
+    const isMaintenanceMode = false;
 
     const { addService, selectedServices } = useCart();
     const navigate = useNavigate();
@@ -28,15 +28,17 @@ const VenuePage = () => {
     // Data Fetching with AbortController for cleanup
     useEffect(() => {
         const controller = new AbortController();
-        
-        // Use local snapshot data instead of fetching live Square catalog
-        // to prevent menu disappearing during maintenance
-        if (servicesData?.length > 0) {
-            setServices(servicesData);
-        }
-        setServicesLoading(false);
+        setServicesLoading(true);
 
-        // Fetch Location Info (Opening Hours remain helpful)
+        // Fetch Services
+        fetchSquareServices().then(live => {
+            if (!controller.signal.aborted && live?.length > 0) setServices(live);
+            setServicesLoading(false);
+        }).catch(() => {
+            if (!controller.signal.aborted) setServicesLoading(false);
+        });
+
+        // Fetch Location Info (Opening Hours only, to prevent overwriting address with Bowral)
         import('../data/squareCatalog').then(m => m.fetchSquareLocation()).then(liveLoc => {
             if (!controller.signal.aborted && liveLoc) {
                 // Keep manual opening hours for now as requested
@@ -69,13 +71,8 @@ const VenuePage = () => {
     }, []);
 
     const handleServiceSelect = useCallback((service) => {
-        if (isMaintenanceMode) {
-            setShowMaintenance(true);
-            return;
-        }
-        addService(service);
-        navigate('/booking');
-    }, [addService, navigate]);
+        window.location.href = 'https://book.squareup.com/appointments/8qrb90zh045s17/location/LY3JYWKY4FHHQ/services?authuser=1&rwg_token=AFd1xnEmp34DaOnnMyObCkq-2UQnxG50GUiaQjzw7ZJsSpaxqz0XDnVG1mmuTT15VOxIX5w6gIpNp1l1Gbo2GCQBZ-a1NIszfA%3D%3D';
+    }, []);
 
     return (
         <div className={styles.pageContainer}>

@@ -42,11 +42,10 @@ const BookingPage = () => {
     const [turnstileToken, setTurnstileToken] = useState(null);
 
     useEffect(() => {
-        // Use local snapshot data instead of fetching live Square catalog
-        if (servicesData?.length > 0) {
-            setServices(servicesData);
-        }
-        setServicesLoading(false);
+        fetchSquareServices().then(liveServices => {
+            if (liveServices && liveServices.length > 0) setServices(liveServices);
+            setServicesLoading(false);
+        });
 
         import('../data/squareCatalog').then(m => m.fetchSquareTeamMembers()).then(team => {
             if (team && team.length > 0) {

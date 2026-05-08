@@ -32,7 +32,7 @@ const Header = () => {
                             <FiPhone className={styles.btnIcon} />
                             <span>Call 0493 853 415</span>
                         </a>
-                        <Link to="/booking" className={styles.bookBtn}>Book Online</Link>
+                        <a href="https://book.squareup.com/appointments/8qrb90zh045s17/location/LY3JYWKY4FHHQ/services?authuser=1&rwg_token=AFd1xnEmp34DaOnnMyObCkq-2UQnxG50GUiaQjzw7ZJsSpaxqz0XDnVG1mmuTT15VOxIX5w6gIpNp1l1Gbo2GCQBZ-a1NIszfA%3D%3D" className={styles.bookBtn}>Book Online</a>
 
                         {user && (
                             <>
@@ -55,7 +55,7 @@ const Header = () => {
                         <a href="tel:0493853415" className={styles.mobileCallIconBtn}>
                             <FiPhone />
                         </a>
-                        <Link to="/booking" className={styles.mobileBookBtnAction}>Book Now</Link>
+                        <a href="https://book.squareup.com/appointments/8qrb90zh045s17/location/LY3JYWKY4FHHQ/services?authuser=1&rwg_token=AFd1xnEmp34DaOnnMyObCkq-2UQnxG50GUiaQjzw7ZJsSpaxqz0XDnVG1mmuTT15VOxIX5w6gIpNp1l1Gbo2GCQBZ-a1NIszfA%3D%3D" className={styles.mobileBookBtnAction}>Book Now</a>
                         <button className={styles.menuBtn} onClick={toggleMobileMenu}>
                             {isMobileMenuOpen ? <FiX /> : <FiMenu />}
                         </button>
